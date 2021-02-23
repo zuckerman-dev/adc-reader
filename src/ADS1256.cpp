@@ -136,7 +136,7 @@ void ADS1256_ConfigADC(ADS1256_GAIN gain, ADS1256_DRATE drate)
     ADS1256_WaitDRDY();
     UBYTE buf[4] = {0,0,0,0};
     buf[0] = (0<<3) | (1<<2) | (0<<1);
-    buf[1] = 0x08;
+    buf[1] = 0x77; //0x08;
     buf[2] = (0<<5) | (0<<3) | (gain<<0);
     buf[3] = ADS1256_DRATE_E[drate];
     DEV_Digital_Write(DEV_CS_PIN, 0);
