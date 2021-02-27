@@ -36,7 +36,7 @@ function:   Module reset
 parameter:
 Info:
 ******************************************************************************/
-static void ADS1256_reset(void)
+ void ADS1256_reset(void)
 {
     DEV_Digital_Write(DEV_RST_PIN, 1);
     DEV_Delay_ms(200);
@@ -51,7 +51,7 @@ parameter:
         Cmd: command
 Info:
 ******************************************************************************/
-static void ADS1256_WriteCmd(UBYTE Cmd)
+ void ADS1256_WriteCmd(UBYTE Cmd)
 {
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(Cmd);
@@ -65,7 +65,7 @@ parameter:
         data: Written data
 Info:
 ******************************************************************************/
-static void ADS1256_WriteReg(UBYTE Reg, UBYTE data)
+ void ADS1256_WriteReg(UBYTE Reg, UBYTE data)
 {
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(CMD_WREG | Reg);
@@ -81,7 +81,7 @@ parameter:
 Info:
     Return the read data
 ******************************************************************************/
-static UBYTE ADS1256_Read_data(UBYTE Reg)
+UBYTE ADS1256_Read_data(UBYTE Reg)
 {
     UBYTE temp = 0;
     DEV_Digital_Write(DEV_CS_PIN, 0);
@@ -99,7 +99,7 @@ parameter:
 Info:
     Timeout indicates that the operation is not working properly.
 ******************************************************************************/
-static void ADS1256_WaitDRDY(void)
+ void ADS1256_WaitDRDY(void)
 {   
     UDOUBLE i = 0;
     for(i=0;i<4000000;i++){
@@ -136,7 +136,7 @@ void ADS1256_ConfigADC(ADS1256_GAIN gain, ADS1256_DRATE drate)
     ADS1256_WaitDRDY();
     UBYTE buf[4] = {0,0,0,0};
     buf[0] = (0<<3) | (1<<2) | (0<<1);
-    buf[1] = 0x77; //0x08;
+    buf[1] = 0x08;
     buf[2] = (0<<5) | (0<<3) | (gain<<0);
     buf[3] = ADS1256_DRATE_E[drate];
     DEV_Digital_Write(DEV_CS_PIN, 0);
@@ -157,7 +157,7 @@ parameter:
     Channal : Set channel number
 Info:
 ******************************************************************************/
-static void ADS1256_SetChannal(UBYTE Channal)
+ void ADS1256_SetChannal(UBYTE Channal)
 {
     if(Channal > 7){
         return ;
@@ -206,18 +206,14 @@ Info:
 UBYTE ADS1256_init(void)
 {
     ADS1256_reset();
-    if(ADS1256_ReadChipID() == 3){
-        printf("ID Read success \r\n");
-    }
-    else{
-        printf("ID Read failed \r\n");
+    DEV_Delay_ms(20);
+
+    if(ADS1256_ReadChipID() != 3){
         return 1;
     }
-    ADS1256_ConfigADC(ADS1256_GAIN_1, ADS1256_30000SPS);
-    
-    
-    // printf("ADD 0x02  = 0x%x\r\n",ADS1256_Read_data(0x02));
-    // printf("ADD 0x03  = 0x%x\r\n",ADS1256_Read_data(0x03));
+    ADS1256_ConfigADC(ADS1256_GAIN_4, ADS1256_15000SPS);
+    ADS1256_WriteReg(REG_STATUS, (1 << 1));
+
     return 0;
 }
 
@@ -226,13 +222,10 @@ function:  Read ADC data
 parameter: 
 Info:
 ******************************************************************************/
-static UDOUBLE ADS1256_Read_ADC_Data(void)
+ UDOUBLE ADS1256_Read_ADC_Data(void)
 {
     UDOUBLE read = 0;
     UBYTE buf[3] = {0,0,0};
-    
-    ADS1256_WaitDRDY();
-    DEV_Delay_ms(1);
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(CMD_RDATA);
     DEV_Delay_ms(1);
@@ -245,7 +238,7 @@ static UDOUBLE ADS1256_Read_ADC_Data(void)
     read |= buf[2];
     //printf("%d  %d  %d \r\n",buf[0],buf[1],buf[2]);
     if (read & 0x800000)
-        read &= 0xFF000000;
+        read |= 0xFF000000;
     return read;
 }
 
@@ -258,25 +251,29 @@ Info:
 UDOUBLE ADS1256_GetChannalValue(UBYTE Channel)
 {
     UDOUBLE Value = 0;
-    while(DEV_Digital_Read(DEV_DRDY_PIN) == 1);
-    if(ScanMode == 0){// 0  Single-ended input  8 channel1 Differential input  4 channe 
-        if(Channel>=8){
-            return 0;
-        }
-        ADS1256_SetChannal(Channel);
-        ADS1256_WriteCmd(CMD_SYNC);
-        ADS1256_WriteCmd(CMD_WAKEUP);
-        Value = ADS1256_Read_ADC_Data();
-    }
-    else{
-        if(Channel>=4){
-            return 0;
-        }
+    // while(DEV_Digital_Read(DEV_DRDY_PIN) == 1);
+    // if(ScanMode == 0){// 0  Single-ended input  8 channel1 Differential input  4 channe 
+    //     if(Channel>=8){
+    //         return 0;
+    //     }
+    //     ADS1256_SetChannal(Channel);
+    //     ADS1256_WriteCmd(CMD_SYNC);
+    //     DEV_Delay_ms(1);
+    //     ADS1256_WriteCmd(CMD_WAKEUP);
+    //     DEV_Delay_ms(1);
+    //     Value = ADS1256_Read_ADC_Data();
+    // }
+    // else{
+    //     if(Channel>=4){
+    //         return 0;
+    //     }
         ADS1256_SetDiffChannal(Channel);
         ADS1256_WriteCmd(CMD_SYNC);
+        DEV_Delay_ms(1);
         ADS1256_WriteCmd(CMD_WAKEUP);
+        DEV_Delay_ms(1);
         Value = ADS1256_Read_ADC_Data();
-    }
+    // }
     return Value;
 }
 

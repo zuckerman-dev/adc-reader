@@ -33,7 +33,7 @@
 #include "DEV_Config.h"
 
 /* gain channel*/
-typedef enum
+enum ADS1256_GAIN
 {
 	ADS1256_GAIN_1			= 0,	/* GAIN   1 */
 	ADS1256_GAIN_2			= 1,	/*GAIN   2 */
@@ -42,9 +42,9 @@ typedef enum
 	ADS1256_GAIN_16			= 4,	/* GAIN  16 */
 	ADS1256_GAIN_32			= 5,	/*GAIN    32 */
 	ADS1256_GAIN_64			= 6,	/*GAIN    64 */
-}ADS1256_GAIN;
+};
 
-typedef enum
+enum ADS1256_DRATE
 {
 	ADS1256_30000SPS = 0,
 	ADS1256_15000SPS,
@@ -62,12 +62,11 @@ typedef enum
 	ADS1256_10SPS,
 	ADS1256_5SPS,
 	ADS1256_2d5SPS,
-    
 	ADS1256_DRATE_MAX
-}ADS1256_DRATE;
+};
 
 
-typedef enum
+enum ADS1256_REG
 {
 	/*Register address, followed by reset the default values */
 	REG_STATUS = 0,	// x1H
@@ -81,10 +80,10 @@ typedef enum
 	REG_FSC0   = 8, // xxH
 	REG_FSC1   = 9, // xxH
 	REG_FSC2   = 10, // xxH
-}ADS1256_REG;
+};
 
 
-typedef enum
+enum ADS1256_CMD
 {
 	CMD_WAKEUP  = 0x00,	// Completes SYNC and Exits Standby Mode 0000  0000 (00h)
 	CMD_RDATA   = 0x01, // Read Data 0000  0001 (01h)
@@ -100,11 +99,11 @@ typedef enum
 	CMD_SYNC    = 0xFC, // Synchronize the A/D Conversion 1111   1100 (FCh)
 	CMD_STANDBY = 0xFD, // Begin Standby Mode 1111   1101 (FDh)
 	CMD_RESET   = 0xFE, // Reset to Power-Up Values 1111   1110 (FEh)
-}ADS1256_CMD;
+};
 
 
 
-static const uint8_t ADS1256_DRATE_E[ADS1256_DRATE_MAX] =
+static const uint8_t ADS1256_DRATE_E[ADS1256_DRATE::ADS1256_DRATE_MAX] =
 {
 	0xF0,		/*reset the default values  */
 	0xE0,
@@ -125,11 +124,13 @@ static const uint8_t ADS1256_DRATE_E[ADS1256_DRATE_MAX] =
 };
 
 
-
 UBYTE ADS1256_init(void);
 void ADS1256_SetMode(UBYTE Mode);
 void ADS1256_ConfigADC(ADS1256_GAIN gain, ADS1256_DRATE drate);
+UDOUBLE ADS1256_Read_ADC_Data(void);
 UDOUBLE ADS1256_GetChannalValue(UBYTE Channel);
 void ADS1256_GetAll(UDOUBLE *ADC_Value);
+void ADS1256_WriteCmd(UBYTE Cmd);
+void ADS1256_WriteReg(UBYTE Reg, UBYTE data);
 
 #endif

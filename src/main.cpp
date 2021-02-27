@@ -1,45 +1,139 @@
-#include <cstdlib>     //exit()
+#include <cstdlib>
 #include <ctime>
 #include <cstdio>
 #include <string>
+#include <chrono>
+#include <signal.h>
 
-#include <signal.h>     //signal()
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <vector>
 
 #include "ADS1256.h"
 
-void  Handler(int signo)
-{
-    //System Exit
-    DEV_ModuleExit();
+#include <CLI/Error.hpp>
+#include <CLI/App.hpp>
+#include <CLI/Formatter.hpp>
+#include <CLI/Config.hpp>
 
+#include <concurrentqueue/concurrentqueue.h>
+
+using namespace moodycamel;
+
+using SignalValues = std::tuple<double, double, double>;
+
+ConcurrentQueue<SignalValues> q;
+
+void Handler(int signo)
+{
+    DEV_ModuleExit();
     exit(0);
 }
 
-int main(void)
-{
-    UDOUBLE ADC[8],i;
-    DEV_ModuleInit();
+class AnalogDataReader {
 
-    // Exception handling:ctrl + c
+public:
+    AnalogDataReader() 
+    {
+        DEV_ModuleInit();
+
+        if (ADS1256_init() == 1)
+        {
+            DEV_ModuleExit();
+            exit(0);
+        }
+    }
+
+    constexpr uint64_t getUnixTimeStamp(const std::time_t *t = nullptr)
+    {
+        //if specific time is not passed then get current time
+        std::time_t st = t == nullptr ? std::time(nullptr) : *t;
+        auto secs = static_cast<std::chrono::seconds>(st).count();
+        return static_cast<uint64_t>(secs);
+    }
+
+    template<uint8_t channel>
+    double getValue()
+    {
+        UDOUBLE read = 0;
+        UBYTE buf[3] = {0, 0, 0};
+
+        while(DEV_Digital_Read(DEV_DRDY_PIN) == 1) {}
+        
+        DEV_SPI_WriteByte(CMD_WREG | REG_MUX);
+        delayMicroseconds(30);
+        DEV_SPI_WriteByte(0x00);
+        
+        DEV_SPI_WriteByte(((channel*2) << 4) | (channel*2+1));
+        
+        DEV_SPI_WriteByte(CMD_SYNC);
+        delayMicroseconds(100);
+        DEV_SPI_WriteByte(CMD_WAKEUP);
+        DEV_SPI_WriteByte(CMD_RDATA);
+        delayMicroseconds(30);
+
+        read = ADS1256_Read_ADC_Data();
+        
+        if (read  & 0x00800000) {
+            read  |= 0xFF000000;
+        }
+
+        return ((double)read / 0x7FFFFF) * ((2.5 * 2) / 4);
+    }
+
+    void readData()
+    {
+        double values[3] = {};
+
+        while (true)
+        {
+            values[0] = getValue<0>();
+            values[1] = getValue<1>();
+            values[2] = getValue<2>();
+
+            printf("%lld, %f, %f, %f \n", getUnixTimeStamp(), values[0], values[1], values[2]);
+        }
+    }
+
+};
+
+
+int main(int argc, char **argv)
+{
+    CLI::App app{"AD1256 differential analog input test application"};
+
+    uint32_t adc_gain, adc_sampling_rate; 
+
+    app.add_option("-g,--gain", adc_gain, "ADC Gain");
+    app.add_option("-r,--sampling_rate", adc_gain, "ADC Sampling rate");
+
+    CLI11_PARSE(app, argc, argv);
+
     signal(SIGINT, Handler);
 
-    if(ADS1256_init() == 1){
-        DEV_ModuleExit();
-        exit(0);
-    }
+    AnalogDataReader reader;
 
-    while(true) {
-        
-        ADS1256_GetAll(ADC);
+    std::thread producer([&]() {
+        while (true)
+        {
+            q.enqueue(std::make_tuple(reader.getValue<0>(), reader.getValue<1>(), reader.getValue<2>()));
+        }
+    });
 
-        printf("%f,", ADC[0]*5.0/0x7fffff);
-        printf("%f,", ADC[1]*5.0/0x7fffff);
-        printf("%f,", ADC[2]*5.0/0x7fffff);
-        printf("%f,", ADC[3]*5.0/0x7fffff);
-        printf("%f,", ADC[4]*5.0/0x7fffff);
-        printf("%f", ADC[5]*5.0/0x7fffff);
-        printf("\n");
-    }
+    std::thread consumer([&]() {
+		while(true) 
+        {
+            SignalValues values;
+			if (q.try_dequeue(values)) 
+            {
+                auto [signal1, signal2, signal3] = values;
+                printf("%f, %f, %f \n", signal1, signal2, signal3);
+			}
+		}
+	});
+
+    producer.join();
 
     return 0;
 }
