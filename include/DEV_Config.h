@@ -1,5 +1,5 @@
 /*****************************************************************************
-* | File      	:   DEV_Config.c
+* | File      	:   DEV_Config.h
 * | Author      :   Waveshare team
 * | Function    :   Hardware underlying interface
 * | Info        :
@@ -7,9 +7,9 @@
 *                and enhance portability
 *----------------
 * |	This version:   V1.0
-* | Date        :   2018-11-22
+* | Date        :   2019-03-12
 * | Info        :
-
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documnetation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -32,16 +32,13 @@
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
-
+#include <bcm2835.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "Debug.h"
-#include <wiringPi.h>
-#include <wiringPiSPI.h>
 
-
-
-
+/**
+ * data
+**/
 #define UBYTE   uint8_t
 #define UWORD   uint16_t
 #define UDOUBLE uint32_t
@@ -55,26 +52,23 @@
 
 /**
  * GPIO read and write
-**/ 
-#define DEV_Digital_Write(_pin, _value)  digitalWrite(_pin, _value == 0? LOW:HIGH)
-#define DEV_Digital_Read(_pin)  digitalRead(_pin)
-
+**/
+#define DEV_Digital_Write(_pin, _value) bcm2835_gpio_write(_pin, _value)
+#define DEV_Digital_Read(_pin) bcm2835_gpio_lev(_pin)
 
 /**
  * SPI
 **/
-#define DEV_SPI_WriteByte(_dat)  SPI_WriteByte(_dat)
-#define DEV_SPI_ReadByte()  SPI_ReadByte()
-
+#define DEV_SPI_WriteByte(__value) bcm2835_spi_transfer(__value)
+#define DEV_SPI_ReadByte() bcm2835_spi_transfer(0xff)
 /**
  * delay x ms
 **/
-#define DEV_Delay_ms(__xms)   delay(__xms)
+#define DEV_Delay_ms(__xms) bcm2835_delay(__xms)
 
-
-/*-----------------------------------------------------------------------------*/
-void SPI_WriteByte(uint8_t value);
-UBYTE SPI_ReadByte(void);
-int DEV_ModuleInit(void);
+/*------------------------------------------------------------------------------------------------------*/
+UBYTE DEV_ModuleInit(void);
 void DEV_ModuleExit(void);
+
+
 #endif

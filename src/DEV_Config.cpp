@@ -1,5 +1,5 @@
 /*****************************************************************************
-* | File      	:   DEV_Config.c
+* | File      	:   DEV_Config.h
 * | Author      :   Waveshare team
 * | Function    :   Hardware underlying interface
 * | Info        :
@@ -7,9 +7,9 @@
 *                and enhance portability
 *----------------
 * |	This version:   V1.0
-* | Date        :   2018-11-22
+* | Date        :   2019-03-12
 * | Info        :
-
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documnetation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -31,13 +31,6 @@
 ******************************************************************************/
 #include "DEV_Config.h"
 
-/********************************************************************************
-function:	Delay function
-note:
-	Driver_Delay_ms(xms) : Delay x ms
-********************************************************************************/
-
-
 /******************************************************************************
 function:	Initialization pin
 parameter:
@@ -45,9 +38,13 @@ Info:
 ******************************************************************************/
 static void DEV_GPIOConfig(void)
 {
-    pinMode(DEV_RST_PIN, OUTPUT);
-    pinMode(DEV_CS_PIN, OUTPUT);
-    pinMode(DEV_DRDY_PIN, INPUT);
+    //output
+	bcm2835_gpio_fsel(DEV_RST_PIN, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(DEV_CS_PIN, BCM2835_GPIO_FSEL_OUTP);
+
+    //intput
+	bcm2835_gpio_fsel(DEV_DRDY_PIN,BCM2835_GPIO_FSEL_INPT);
+	
 }
 
 /******************************************************************************
@@ -55,48 +52,31 @@ function:	Module Initialize, the BCM2835 library and initialize the pins, SPI pr
 parameter:
 Info:
 ******************************************************************************/
-int DEV_ModuleInit(void)
+UBYTE DEV_ModuleInit(void)
 {
-    //1.wiringPiSetupGpio
-    //if(wiringPiSetup() < 0)//use wiringpi Pin number table
-    if(wiringPiSetupGpio() < 0) { //use BCM2835 Pin number table
-        Debug("set wiringPi lib failed	!!! \r\n");
+    if(!bcm2835_init()) {
+        printf("bcm2835 init failed  !!! \r\n");
         return 1;
     } else {
-        Debug("set wiringPi lib success  !!! \r\n");
+        printf("bcm2835 init success !!! \r\n");
     }
-
-
-    //2.GPIO config
-    DEV_GPIOConfig();
 	
-    //3.spi init
-    //wiringPiSPISetup(0,3200000,1);
-	wiringPiSPISetupMode(0,3200000,1);
+	DEV_GPIOConfig();
+
+    bcm2835_spi_begin();                                         //Start spi interface, set spi pin for the reuse function
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);     //High first transmission
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE1);                  //spi mode 0
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);  //Frequency
     return 0;
 }
 
-void SPI_WriteByte(uint8_t value)
-{
-    int read_data;
-    read_data = wiringPiSPIDataRW(0,&value,1);
-    if(read_data < 0)
-        perror("wiringPiSPIDataRW failed\r\n");
-}
-
-
-UBYTE SPI_ReadByte()
-{
-    UBYTE read_data,value=0xff;
-    read_data = wiringPiSPIDataRW(0,&value,1);
-    if(read_data < 0)
-        perror("wiringPiSPIDataRW failed\r\n");
-    return value;
-}
-
+/******************************************************************************
+function:	Module exits, closes SPI and BCM2835 library
+parameter:
+Info:
+******************************************************************************/
 void DEV_ModuleExit(void)
 {
-  //  LCD_RST_1;
-	DEV_Digital_Write(DEV_RST_PIN,1);
+    bcm2835_spi_end();
+    bcm2835_close();
 }
-
