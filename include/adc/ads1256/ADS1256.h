@@ -36,13 +36,14 @@
 typedef enum
 {
 	ADS1256_GAIN_1			= 0,	/* GAIN   1 */
-	ADS1256_GAIN_2			= 1,	/*GAIN   2 */
-	ADS1256_GAIN_4			= 2,	/*GAIN   4 */
-	ADS1256_GAIN_8			= 3,	/*GAIN   8 */
+	ADS1256_GAIN_2			= 1,	/* GAIN   2 */
+	ADS1256_GAIN_4			= 2,	/* GAIN   4 */
+	ADS1256_GAIN_8			= 3,	/* GAIN   8 */
 	ADS1256_GAIN_16			= 4,	/* GAIN  16 */
-	ADS1256_GAIN_32			= 5,	/*GAIN    32 */
-	ADS1256_GAIN_64			= 6,	/*GAIN    64 */
-}ADS1256_GAIN;
+	ADS1256_GAIN_32			= 5,	/* GAIN  32 */
+	ADS1256_GAIN_64			= 6,	/* GAIN  64 */
+
+} ADS1256_GAIN;
 
 typedef enum
 {
@@ -64,7 +65,8 @@ typedef enum
 	ADS1256_2d5SPS,
     
 	ADS1256_DRATE_MAX
-}ADS1256_DRATE;
+	
+} ADS1256_DRATE;
 
 
 typedef enum
@@ -81,7 +83,7 @@ typedef enum
 	REG_FSC0   = 8, // xxH
 	REG_FSC1   = 9, // xxH
 	REG_FSC2   = 10, // xxH
-}ADS1256_REG;
+} ADS1256_REG;
 
 
 typedef enum
@@ -100,7 +102,7 @@ typedef enum
 	CMD_SYNC    = 0xFC, // Synchronize the A/D Conversion 1111   1100 (FCh)
 	CMD_STANDBY = 0xFD, // Begin Standby Mode 1111   1101 (FDh)
 	CMD_RESET   = 0xFE, // Reset to Power-Up Values 1111   1110 (FEh)
-}ADS1256_CMD;
+} ADS1256_CMD;
 
 
 

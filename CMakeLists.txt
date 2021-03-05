@@ -2,9 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 
 project(adcr VERSION 0.0.1)
 
+set(ADS1256_HEADERS 
+    include/adc/ads1256/ADS1256.h
+    include/adc/ads1256/DEV_Config.h
+)
+
 set(SRC_ADS1256 
     src/adc/ads1256/ADS1256.cpp
-    src/DEV_Config.cpp
+    src/adc/ads1256/DEV_Config.cpp
 )
 
 set(SRC 
@@ -71,7 +76,7 @@ install(
         Devel
 )
   
-install(FILES ${HEADERS} 
+install(FILES ${ADS1256_HEADERS} 
     DESTINATION 
         ${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/${PROJECT_VERSION_MAJOR}/
     COMPONENT 
