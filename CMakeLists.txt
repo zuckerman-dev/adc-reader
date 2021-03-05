@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(adcr VERSION 0.0.1)
 
 set(SRC_ADS1256 
-    src/ADS1256.cpp
+    src/adc/ads1256/ADS1256.cpp
     src/DEV_Config.cpp
 )
 

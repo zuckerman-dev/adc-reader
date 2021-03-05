@@ -11,7 +11,7 @@
 #include <vector>
 #include <future>
 
-#include "ADS1256.h"
+#include "adc/ads1256/ADS1256.h"
 
 #include <CLI/Error.hpp>
 #include <CLI/App.hpp>
