@@ -5,10 +5,16 @@ project(adcr VERSION 0.0.1)
 set(ADS1256_HEADERS 
     include/adc/ads1256/ADS1256.h
     include/adc/ads1256/DEV_Config.h
+    include/adc/ads1256/ADS1256Reader.h
+)
+
+set(ADC_COMMON_HEADERS
+    include/adc/AnalogDataReader.h
 )
 
 set(SRC_ADS1256 
     src/adc/ads1256/ADS1256.cpp
+    src/adc/ads1256/ADS1256Reader.cpp
     src/adc/ads1256/DEV_Config.cpp
 )
 
@@ -30,7 +36,7 @@ target_include_directories(${TARGET_ADS1256}
         PRIVATE 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/${PROJECT_VERSION_MAJOR}/>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}//>
 )
 
 include(CMakePackageConfigHelpers)
@@ -78,11 +84,18 @@ install(
   
 install(FILES ${ADS1256_HEADERS} 
     DESTINATION 
-        ${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/${PROJECT_VERSION_MAJOR}/
+        ${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/
     COMPONENT 
         Devel
 )
       
+install(FILES ${ADC_COMMON_HEADERS} 
+    DESTINATION 
+        ${CMAKE_INSTALL_INCLUDEDIR}/adc/
+    COMPONENT 
+        Devel
+)
+
 add_executable(${PROJECT_NAME} ${SRC})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_ADS1256} Threads::Threads CLI11::CLI11 rt crypt m)
