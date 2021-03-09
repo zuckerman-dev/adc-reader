@@ -8,6 +8,15 @@ Sample application to read data from `ADS1256`
     cmake <source-dir>
     make 
 
+# Documentation
+
+    mkdir build && cd build
+    cmake -DENABLE_API_DOCUMENTATION=ON <source-dir>
+    make doxygen
+
+use simple python http server to view it in browser
+
+    python -m http.server 8000 --directory <build>/html
 # Usage
 
     ./adcr --help

@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 project(adcr VERSION 0.0.1)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+option(ENABLE_API_DOCUMENTATION "Enable C++ API documentation" ON)
+
 set(ADS1256_HEADERS 
     include/adc/ads1256/ADS1256.h
     include/adc/ads1256/DEV_Config.h
@@ -102,5 +108,19 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_ADS1256} Threads::Threads
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+if(ENABLE_API_DOCUMENTATION)
+    find_package(Doxygen
+                REQUIRED dot
+                OPTIONAL_COMPONENTS mscgen dia)
+
+    set(DOXYGEN_GENERATE_HTML YES)
+    
+    doxygen_add_docs(
+        doxygen
+        ${PROJECT_SOURCE_DIR}/include
+        COMMENT "Generate C++ API documentation"
+    )                
+endif()
 
 include(CPack)
