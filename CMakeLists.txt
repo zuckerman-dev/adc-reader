@@ -14,6 +14,14 @@ set(ADS1256_HEADERS
     include/adc/ads1256/ADS1256Reader.h
 )
 
+set(ADS1263_HEADERS
+    include/adc/ads1263/ADS1263.h
+    include/adc/ads1263/DEV_Config.h
+    include/adc/ads1263/ADS1263Reader.h
+    include/adc/ads1263/dev_hardware_SPI.h
+    include/adc/ads1263/RPI_sysfs_gpio.h
+)
+
 set(ADC_COMMON_HEADERS
     include/adc/AnalogDataReader.h
 )
@@ -22,6 +30,14 @@ set(SRC_ADS1256
     src/adc/ads1256/ADS1256.cpp
     src/adc/ads1256/ADS1256Reader.cpp
     src/adc/ads1256/DEV_Config.cpp
+)
+
+set(SRC_ADS1263 
+    src/adc/ads1263/ADS1263.cpp
+    src/adc/ads1263/ADS1263Reader.cpp
+    src/adc/ads1263/DEV_Config.cpp
+    src/adc/ads1263/dev_hardware_SPI.cpp
+    src/adc/ads1263/RPI_sysfs_gpio.cpp
 )
 
 set(SRC 
@@ -34,6 +50,17 @@ find_package(Threads REQUIRED)
 find_package(WiringPi REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(bcm2835 CONFIG REQUIRED)
+
+set(TARGET_ADS1263 ads1263)
+add_library(${TARGET_ADS1263} SHARED ${SRC_ADS1263})
+target_link_libraries(${TARGET_ADS1263} PUBLIC bcm2835::bcm2835)
+target_compile_definitions(${TARGET_ADS1263} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
+target_include_directories(${TARGET_ADS1263} 
+        PRIVATE 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PUBLIC 
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1263}//>
+)
 
 set(TARGET_ADS1256 ads1256)
 add_library(${TARGET_ADS1256} SHARED ${SRC_ADS1256})
@@ -50,13 +77,27 @@ include(CMakePackageConfigHelpers)
 set_property(TARGET ${TARGET_ADS1256} PROPERTY VERSION ${PROJECT_VERSION})
 set_property(TARGET ${TARGET_ADS1256} PROPERTY SOVERSION ${PROJECT_VERSION_MAJOR})
 
+set_property(TARGET ${TARGET_ADS1263} PROPERTY VERSION ${PROJECT_VERSION})
+set_property(TARGET ${TARGET_ADS1263} PROPERTY SOVERSION ${PROJECT_VERSION_MAJOR})
+
 install(TARGETS ${TARGET_ADS1256} 
     EXPORT ${TARGET_ADS1256}Targets
     DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
+install(TARGETS ${TARGET_ADS1263} 
+    EXPORT ${TARGET_ADS1263}Targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1256}/${TARGET_ADS1256}ConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    )
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}ConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
     )
@@ -67,6 +108,12 @@ configure_package_config_file(adcConfig.cmake.in
             ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1256}/
 )
   
+configure_package_config_file(adcConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}Config.cmake
+        INSTALL_DESTINATION 
+            ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1263}/
+)
+
 install(EXPORT ${TARGET_ADS1256}Targets
     FILE
         ${TARGET_ADS1256}Targets.cmake
@@ -78,6 +125,17 @@ install(EXPORT ${TARGET_ADS1256}Targets
         Devel
 )
     
+install(EXPORT ${TARGET_ADS1263}Targets
+    FILE
+        ${TARGET_ADS1263}Targets.cmake
+    NAMESPACE 
+        "adc::"
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1253}
+    COMPONENT
+        Devel
+)
+
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1256}/${TARGET_ADS1256}Config.cmake"
@@ -88,6 +146,16 @@ install(
         Devel
 )
   
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}ConfigVersion.cmake"
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1263}
+    COMPONENT
+        Devel
+)
+
 install(FILES ${ADS1256_HEADERS} 
     DESTINATION 
         ${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/
@@ -95,6 +163,13 @@ install(FILES ${ADS1256_HEADERS}
         Devel
 )
       
+install(FILES ${ADS1263_HEADERS} 
+    DESTINATION 
+        ${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1263}/
+    COMPONENT 
+        Devel
+)
+
 install(FILES ${ADC_COMMON_HEADERS} 
     DESTINATION 
         ${CMAKE_INSTALL_INCLUDEDIR}/adc/
@@ -122,5 +197,15 @@ if(ENABLE_API_DOCUMENTATION)
         COMMENT "Generate C++ API documentation"
     )                
 endif()
+
+set(CPACK_PACKAGE_NAME "adc")
+set(CPACK_PACKAGE_VENDOR "Mikhail Tcukerman <michael@zuckerman.dev>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Analog to digital convertion library")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_PACKAGE_VENDOR})
+set(CPACK_GENERATOR "RPM;DEB")
 
 include(CPack)
