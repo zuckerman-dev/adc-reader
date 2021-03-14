@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include <chrono>
 
 namespace adc 
 {
@@ -20,6 +21,14 @@ public:
     AnalogDataReader() = default;
     
     virtual ~AnalogDataReader() = default;
+
+    constexpr uint64_t getUnixTimeStamp(const std::time_t *t)
+    {
+        //if specific time is not passed then get current time
+        std::time_t st = t == nullptr ? std::time(nullptr) : *t;
+        auto secs = static_cast<std::chrono::seconds>(st).count();
+        return static_cast<uint64_t>(secs);
+    }
 
     virtual Signal getValue(const uint8_t channel = Channel::FIRST) = 0;
 

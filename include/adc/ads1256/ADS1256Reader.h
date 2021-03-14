@@ -1,7 +1,6 @@
 #pragma once
 
 #include <thread>
-#include <chrono>
 #include <vector>
 #include <future>
 
@@ -15,8 +14,6 @@ class AnalogDataReader : public adc::AnalogDataReader {
 public:
     AnalogDataReader();
     virtual ~AnalogDataReader() override;
-
-    constexpr uint64_t getUnixTimeStamp(const std::time_t *t = nullptr);
 
     virtual adc::Signal getValue(const uint8_t channel) override;
 
