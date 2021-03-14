@@ -21,14 +21,6 @@ AnalogDataReader::~AnalogDataReader()
     DEV_Digital_Write(DEV_CS_PIN, 1);
 }
 
-constexpr uint64_t AnalogDataReader::getUnixTimeStamp(const std::time_t *t)
-{
-    //if specific time is not passed then get current time
-    std::time_t st = t == nullptr ? std::time(nullptr) : *t;
-    auto secs = static_cast<std::chrono::seconds>(st).count();
-    return static_cast<uint64_t>(secs);
-}
-
 adc::Signal AnalogDataReader::getValue(const uint8_t channel)
 {
     int32_t read = 0;
