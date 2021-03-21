@@ -30,14 +30,14 @@
 #include "adc/ads1256/ADS1256.h"
 #include "DEV_Config.h"
 
-UBYTE ScanMode = 0;
+using namespace adc::ads1256;
 
 /******************************************************************************
 function:   Module reset
 parameter:
 Info:
 ******************************************************************************/
-static void ADS1256_reset(void)
+void ADS1256::reset()
 {
     DEV_Digital_Write(DEV_RST_PIN, 1);
     DEV_Delay_ms(200);
@@ -52,7 +52,7 @@ parameter:
         Cmd: command
 Info:
 ******************************************************************************/
-static void ADS1256_WriteCmd(UBYTE Cmd)
+void ADS1256::WriteCmd(UBYTE Cmd)
 {
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(Cmd);
@@ -66,7 +66,7 @@ parameter:
         data: Written data
 Info:
 ******************************************************************************/
-static void ADS1256_WriteReg(UBYTE Reg, UBYTE data)
+void ADS1256::WriteReg(UBYTE Reg, UBYTE data)
 {
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(CMD_WREG | Reg);
@@ -82,7 +82,7 @@ parameter:
 Info:
     Return the read data
 ******************************************************************************/
-static UBYTE ADS1256_Read_data(UBYTE Reg)
+UBYTE ADS1256::Read_data(UBYTE Reg)
 {
     UBYTE temp = 0;
     DEV_Digital_Write(DEV_CS_PIN, 0);
@@ -100,16 +100,14 @@ parameter:
 Info:
     Timeout indicates that the operation is not working properly.
 ******************************************************************************/
-static void ADS1256_WaitDRDY(void)
+void ADS1256::WaitDRDY()
 {
     UDOUBLE i = 0;
-    for (i = 0; i < 4000000; i++)
-    {
+    for (i = 0; i < 4000000; i++) {
         if (DEV_Digital_Read(DEV_DRDY_PIN) == 0)
             break;
     }
-    if (i >= 4000000)
-    {
+    if (i >= 4000000) {
         printf("Time Out ...\r\n");
     }
 }
@@ -119,11 +117,11 @@ function:  Read device ID
 parameter: 
 Info:
 ******************************************************************************/
-UBYTE ADS1256_ReadChipID(void)
+UBYTE ADS1256::ReadChipID()
 {
     UBYTE id;
-    ADS1256_WaitDRDY();
-    id = ADS1256_Read_data(REG_STATUS);
+    WaitDRDY();
+    id = Read_data(REG_STATUS);
     return id >> 4;
 }
 
@@ -134,14 +132,17 @@ parameter:
     drate: Enumeration type sampling speed
 Info:
 ******************************************************************************/
-void ADS1256_ConfigADC(ADS1256_GAIN gain, ADS1256_DRATE drate)
+void ADS1256::ConfigADC(ADS1256::Gain gain, ADS1256::Drate drate)
 {
-    ADS1256_WaitDRDY();
-    UBYTE buf[4] = {0, 0, 0, 0};
+    WaitDRDY();
+    
+    UBYTE buf[4] = { 0, 0, 0, 0 };
+
     buf[0] = (0 << 3) | (1 << 2) | (0 << 1);
     buf[1] = 0x08;
     buf[2] = (0 << 5) | (0 << 3) | (gain << 0);
-    buf[3] = ADS1256_DRATE_E[drate];
+    buf[3] = drate_e[drate];
+    
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(CMD_WREG | 0);
     DEV_SPI_WriteByte(0x03);
@@ -160,32 +161,25 @@ parameter:
     Channal : Set channel number
 Info:
 ******************************************************************************/
-static void ADS1256_SetChannal(UBYTE Channal)
+void ADS1256::SetChannal(UBYTE Channal)
 {
-    if (Channal > 7)
-    {
+    if (Channal > 7) {
         return;
     }
-    ADS1256_WriteReg(REG_MUX, (Channal << 4) | (1 << 3));
+
+    WriteReg(REG_MUX, (Channal << 4) | (1 << 3));
 }
 
-void ADS1256_SetDiffChannal(UBYTE Channal)
+void ADS1256::SetDiffChannal(UBYTE Channal)
 {
-    if (Channal == 0)
-    {
-        ADS1256_WriteReg(REG_MUX, (0 << 4) | 1); //DiffChannal  AIN0-AIN1
-    }
-    else if (Channal == 1)
-    {
-        ADS1256_WriteReg(REG_MUX, (2 << 4) | 3); //DiffChannal   AIN2-AIN3
-    }
-    else if (Channal == 2)
-    {
-        ADS1256_WriteReg(REG_MUX, (4 << 4) | 5); //DiffChannal    AIN4-AIN5
-    }
-    else if (Channal == 3)
-    {
-        ADS1256_WriteReg(REG_MUX, (6 << 4) | 7); //DiffChannal   AIN6-AIN7
+    if (Channal == 0) {
+        WriteReg(REG_MUX, (0 << 4) | 1); //DiffChannal  AIN0-AIN1
+    } else if (Channal == 1) {
+        WriteReg(REG_MUX, (2 << 4) | 3); //DiffChannal   AIN2-AIN3
+    } else if (Channal == 2) {
+        WriteReg(REG_MUX, (4 << 4) | 5); //DiffChannal    AIN4-AIN5
+    } else if (Channal == 3) {
+        WriteReg(REG_MUX, (6 << 4) | 7); //DiffChannal   AIN6-AIN7
     }
 }
 
@@ -196,14 +190,11 @@ parameter:
            1 channel1 Differential input
 Info:
 ******************************************************************************/
-void ADS1256_SetMode(UBYTE Mode)
+void ADS1256::SetMode(UBYTE Mode)
 {
-    if (Mode == 0)
-    {
+    if (Mode == 0) {
         ScanMode = 0;
-    }
-    else
-    {
+    } else {
         ScanMode = 1;
     }
 }
@@ -213,26 +204,25 @@ function:  Device initialization
 parameter: 
 Info:
 ******************************************************************************/
-UBYTE ADS1256_init(void)
+UBYTE ADS1256::init()
 {
-    ADS1256_reset();
+    reset();
+
     DEV_Delay_ms(20);
-    for (int i = 0; i < 3; ++i)
-    {
-        if (ADS1256_ReadChipID() == 3)
-        {
+
+    for (int i = 0; i < 3; ++i) {
+        if (ReadChipID() == 3) {
             printf("ID Read success \r\n");
             break;
-        }
-        else
-        {
+        } else {
             printf("ID Read failed \r\n");
             if (i == 2)
                 return 1;
         }
     }
-    ADS1256_ConfigADC(ADS1256_GAIN_64, ADS1256_15000SPS);
-    ADS1256_WriteReg(REG_STATUS, (1 << 1));
+    ConfigADC(ADS1256::Gain::ADS1256_GAIN_64, ADS1256::Drate::ADS1256_15000SPS);
+    WriteReg(ADS1256::Reg::REG_STATUS, (1 << 1));
+
     return 0;
 }
 
@@ -241,10 +231,10 @@ function:  Read ADC data
 parameter: 
 Info:
 ******************************************************************************/
-static UDOUBLE ADS1256_Read_ADC_Data(void)
+UDOUBLE ADS1256::Read_ADC_Data()
 {
     UDOUBLE read = 0;
-    UBYTE buf[3] = {0, 0, 0};
+    UBYTE buf[3] = { 0, 0, 0 };
     DEV_Digital_Write(DEV_CS_PIN, 0);
     DEV_SPI_WriteByte(CMD_RDATA);
     DEV_Delay_ms(1);
@@ -265,10 +255,10 @@ function:  Read ADC data Lite
 parameter: 
 Info:
 ******************************************************************************/
-UDOUBLE ADS1256_Read_ADC_Data_Lite(void)
+UDOUBLE ADS1256::Read_ADC_Data_Lite()
 {
     UDOUBLE read = 0;
-    UBYTE buf[3] = {0, 0, 0};
+    UBYTE buf[3] = { 0, 0, 0 };
     buf[0] = DEV_SPI_ReadByte();
     buf[1] = DEV_SPI_ReadByte();
     buf[2] = DEV_SPI_ReadByte();
@@ -286,40 +276,34 @@ parameter:
     Channel: Channel number
 Info:
 ******************************************************************************/
-UDOUBLE ADS1256_GetChannalValue(UBYTE Channel)
+UDOUBLE ADS1256::GetChannalValue(UBYTE Channel)
 {
     UDOUBLE Value = 0;
     while (DEV_Digital_Read(DEV_DRDY_PIN) == 1)
         ;
-    if (ScanMode == 0)
-    { // 0  Single-ended input  8 channel1 Differential input  4 channe
-        if (Channel >= 8)
-        {
+    if (ScanMode == 0) { // 0  Single-ended input  8 channel1 Differential input  4 channe
+        if (Channel >= 8) {
             return 0;
-        }
-        else if (Channel == 7)
+        } else if (Channel == 7)
             Channel = 0;
         else
             Channel = Channel + 1;
-        ADS1256_SetChannal(Channel);
-        ADS1256_WriteCmd(CMD_SYNC);
+        SetChannal(Channel);
+        WriteCmd(CMD_SYNC);
         DEV_Delay_ms(1);
-        ADS1256_WriteCmd(CMD_WAKEUP);
+        WriteCmd(CMD_WAKEUP);
         DEV_Delay_ms(1);
-        Value = ADS1256_Read_ADC_Data();
-    }
-    else
-    {
-        if (Channel >= 4)
-        {
+        Value = Read_ADC_Data();
+    } else {
+        if (Channel >= 4) {
             return 0;
         }
-        ADS1256_SetDiffChannal(Channel);
-        ADS1256_WriteCmd(CMD_SYNC);
+        SetDiffChannal(Channel);
+        WriteCmd(CMD_SYNC);
         DEV_Delay_ms(1);
-        ADS1256_WriteCmd(CMD_WAKEUP);
+        WriteCmd(CMD_WAKEUP);
         DEV_Delay_ms(1);
-        Value = ADS1256_Read_ADC_Data();
+        Value = Read_ADC_Data();
     }
     return Value;
 }
@@ -330,11 +314,10 @@ parameter:
     ADC_Value : ADC Value
 Info:
 ******************************************************************************/
-void ADS1256_GetAll(UDOUBLE *ADC_Value)
+void ADS1256::GetAll(UDOUBLE* ADC_Value)
 {
     UBYTE i;
-    for (i = 0; i < 8; i++)
-    {
-        ADC_Value[i] = ADS1256_GetChannalValue(i);
+    for (i = 0; i < 8; i++) {
+        ADC_Value[i] = GetChannalValue(i);
     }
 }

@@ -12,7 +12,7 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock, st
 using Gain = uint16_t;
 
 struct SignalData {
-    // TimePoint time_point;
+    TimePoint time_point;
     SignalValues values;
 };
 
@@ -26,7 +26,7 @@ public:
 
     virtual SignalData readData() = 0;
 
-    virtual uint8_t channels() { return _channels; }
+    virtual uint8_t channels() const { return _channels; }
 
     virtual bool initialized() { return _initialized; }
 
