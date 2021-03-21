@@ -2,14 +2,14 @@
 
 using namespace adc::ads1256;
 
-AnalogDataReader::AnalogDataReader() 
+AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(4)
 {
-    DEV_ModuleInit();
+    DEV_Module_Init();
     DEV_Digital_Write(DEV_CS_PIN, 1);
 
     if (ADS1256_init() == 1)
     {
-        DEV_ModuleExit();
+        DEV_Module_Exit();
         exit(0);
     }
 
@@ -21,26 +21,30 @@ AnalogDataReader::~AnalogDataReader()
     DEV_Digital_Write(DEV_CS_PIN, 1);
 }
 
-adc::Signal AnalogDataReader::getValue(const uint8_t channel)
+adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
 {
+    if(channel >= channels()) {
+        return 0;
+    }
+
     int32_t read = 0;
 
     while(DEV_Digital_Read(DEV_DRDY_PIN) == 1) {}
     
     DEV_SPI_WriteByte(CMD_WREG | REG_MUX);
 
-    bcm2835_delayMicroseconds(30);
+    DEV_Delay_ms(30);
 
     DEV_SPI_WriteByte(0x00);
     DEV_SPI_WriteByte(((channel*2) << 4) | ((channel*2)+1)); // Switch to Diff ch 0
     DEV_SPI_WriteByte(CMD_SYNC);
 
-    bcm2835_delayMicroseconds(100);
+    DEV_Delay_ms(100);
 
     DEV_SPI_WriteByte(CMD_WAKEUP);
     DEV_SPI_WriteByte(CMD_RDATA);
 
-    bcm2835_delayMicroseconds(30);
+    DEV_Delay_ms(30);
     
     read = ADS1256_Read_ADC_Data_Lite();
     
@@ -51,7 +55,7 @@ adc::Signal AnalogDataReader::getValue(const uint8_t channel)
     return (((double)read / 0x7FFFFF) * ((2 * 2.5) / (float)_pga)) *  _conversionFactor;
 }
 
-adc::SignalValues AnalogDataReader::readData()
+adc::SignalData AnalogDataReader::readData()
 {
-    return std::make_tuple(getValue(0), getValue(1), getValue(2));
+    return adc::SignalData{getTimePoint(), { getValue(0), getValue(1), getValue(2), getValue(3) } };
 }

@@ -29,6 +29,8 @@
 ******************************************************************************/
 #include "adc/ads1263/ADS1263.h"
 
+using namespace adc::ads1263;
+
 UBYTE ScanMode = 0;
 
 /******************************************************************************
@@ -499,7 +501,7 @@ void ADS1263_GetAll(UDOUBLE *ADC_Value)
 {
     UBYTE i;
     for(i = 0; i<10; i++) {
-        ADC_Value[i] = ADS1263_GetChannalValue(i);
+        ADC_Value[i] = adc::ads1263::ADS1263_GetChannalValue(i);
 		ADS1263_WriteCmd(CMD_STOP1);
 		DEV_Delay_ms(20);
     }
