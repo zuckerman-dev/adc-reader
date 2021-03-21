@@ -183,12 +183,12 @@ typedef enum
 	CMD_WREG2	= 0x00,	// number of registers to write minus 1, 000n nnnn
 }ADS1263_CMD;
 
-UBYTE ADS1263_init(void);
-void ADS1263_SetMode(UBYTE Mode);
-void ADS1263_GetAll(UDOUBLE *ADC_Value);
-void ADS1263_GetAll_ADC2(UDOUBLE *ADC_Value);
+UBYTE 	ADS1263_init(void);
+void 	ADS1263_SetMode(UBYTE Mode);
+void 	ADS1263_GetAll(UDOUBLE *ADC_Value);
+void 	ADS1263_GetAll_ADC2(UDOUBLE *ADC_Value);
 UDOUBLE ADS1263_RTD(ADS1263_DELAY delay, ADS1263_GAIN gain, ADS1263_DRATE drate);
 UDOUBLE ADS1263_GetChannalValue(UBYTE Channel);
-void ADS1263_DAC(ADS1263_DAC_VOLT volt, UBYTE isPositive, UBYTE isClose);
+void 	ADS1263_DAC(ADS1263_DAC_VOLT volt, UBYTE isPositive, UBYTE isClose);
 
 } // namespace adc::ads1263

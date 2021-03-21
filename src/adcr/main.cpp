@@ -38,6 +38,8 @@ class AnalogDataReaderFactory {
 public:
     static adc::AnalogDataReaderPtr make(const std::string & type) {
 
+        spdlog::info("Initialization of reader object for {}", type);
+
         adc::AnalogDataReaderPtr reader{nullptr};
 
         if(type == "ads1256") 
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
 
     signal(SIGINT, Handler);
 
-    adc::AnalogDataReaderPtr reader = std::make_shared<adc::ads1256::AnalogDataReader>();
+    adc::AnalogDataReaderPtr reader = AnalogDataReaderFactory::make(reader_type);
 
     std::future<void> futureObj = exitSignal.get_future();
 
@@ -98,7 +100,7 @@ int main(int argc, char **argv)
             {
                 output.precision(std::numeric_limits<adc::Signal>::digits10);
 
-                // output << data.time_point.time_since_epoch().count() << ",";
+                output << data.time_point.time_since_epoch().count() << ",";
                 
                 std::for_each(data.values.begin(), data.values.end(), [&](const adc::Signal & signal) {
                     output << std::fixed << signal << ",";

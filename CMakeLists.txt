@@ -231,7 +231,16 @@ install(FILES ${ADC_COMMON_HEADERS}
 
 add_executable(${PROJECT_NAME}  src/adcr/main.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_ADS1256} date::date Threads::Threads CLI11::CLI11 spdlog::spdlog rt crypt m)
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE 
+        ${TARGET_ADS1256} 
+        ${TARGET_ADS1263} 
+        date::date 
+        Threads::Threads 
+        CLI11::CLI11 
+        spdlog::spdlog 
+        rt crypt m
+)
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
