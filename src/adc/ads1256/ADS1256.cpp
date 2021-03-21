@@ -231,7 +231,7 @@ UBYTE ADS1256_init(void)
                 return 1;
         }
     }
-    ADS1256_ConfigADC(ADS1256_GAIN_64, ADS1256_7500SPS);
+    ADS1256_ConfigADC(ADS1256_GAIN_64, ADS1256_15000SPS);
     ADS1256_WriteReg(REG_STATUS, (1 << 1));
     return 0;
 }
