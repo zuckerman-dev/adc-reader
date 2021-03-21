@@ -57,5 +57,5 @@ adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
 
 adc::SignalData AnalogDataReader::readData()
 {
-    return adc::SignalData{getTimePoint(), { getValue(0), getValue(1), getValue(2), getValue(3) } };
+    return adc::SignalData{{ getValue(0), getValue(1), getValue(2), getValue(3) } };
 }

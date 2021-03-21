@@ -98,7 +98,7 @@ int main(int argc, char **argv)
             {
                 output.precision(std::numeric_limits<adc::Signal>::digits10);
 
-                output << data.time_point.time_since_epoch().count() << ",";
+                // output << data.time_point.time_since_epoch().count() << ",";
                 
                 std::for_each(data.values.begin(), data.values.end(), [&](const adc::Signal & signal) {
                     output << std::fixed << signal << ",";
