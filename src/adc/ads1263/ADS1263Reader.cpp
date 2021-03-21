@@ -2,30 +2,45 @@
 
 using namespace adc::ads1263;
 
-AnalogDataReader::AnalogDataReader() 
+constexpr auto TEST_ADC =	1;			// ADC Test part
+constexpr auto TEST_RTD = 	0;		// RTD Test part
+constexpr auto REF		= 5.08;		//Modify according to actual voltage
+								//external AVDD and AVSS(Default), or internal 2.5V
+
+AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(5)
 {
-    // DEV_ModuleInit();
-    // DEV_Digital_Write(DEV_CS_PIN, 1);
+    DEV_Module_Init();
 
-    // if (ADS1263_init() == 1)
-    // {
-    //     DEV_ModuleExit();
-    //     exit(0);
-    // }
+    ADS1263_SetMode(1);
 
-    // DEV_Digital_Write(DEV_CS_PIN, 0);
+    if(ADS1263_init() == 1) 
+    {
+        DEV_Module_Exit();
+        exit(0);
+    }
 }
 
 AnalogDataReader::~AnalogDataReader() 
 {
-    // DEV_Digital_Write(DEV_CS_PIN, 1);
+    DEV_Module_Exit();
 }
 
-adc::Signal AnalogDataReader::getValue(const uint8_t channel)
+adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
 {
+    if(channel >= channels()) {
+        return 0.0;
+    }
+
+    UDOUBLE value = ADS1263_GetChannalValue(channel);
+
+    if((value >> 31) == 1) {
+        return REF * 2 - value / 2147483648.0 * REF;		//7fffffff + 1
+    }
+
+    return value / 2147483647.0 * REF;		//7fffffff
 }
 
-adc::SignalValues AnalogDataReader::readData()
+adc::SignalData AnalogDataReader::readData()
 {
-    // return std::make_tuple(getValue(0), getValue(1), getValue(2));
+    return adc::SignalData{getTimePoint(), { getValue(0), getValue(1), getValue(2), getValue(3), getValue(3) } };
 }

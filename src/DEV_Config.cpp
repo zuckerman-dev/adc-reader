@@ -27,25 +27,15 @@
 # THE SOFTWARE.
 #
 ******************************************************************************/
-#include "adc/ads1263/DEV_Config.h"
+#include "DEV_Config.h"
 #include <fcntl.h>
-
-/**
- * GPIO
-**/
-int DEV_RST_PIN;
-int DEV_CS_PIN;
-int DEV_DRDY_PIN;
 
 /**
  * GPIO read and write
 **/
 void DEV_Digital_Write(UWORD Pin, UBYTE Value)
 {
-
 // printf("%s pin %d value %d \n", __PRETTY_FUNCTION__, Pin, Value);
-
-#ifdef RPI
 #ifdef USE_BCM2835_LIB
 	bcm2835_gpio_write(Pin, Value);
 #elif USE_WIRINGPI_LIB
@@ -53,36 +43,18 @@ void DEV_Digital_Write(UWORD Pin, UBYTE Value)
 #elif USE_DEV_LIB
 	SYSFS_GPIO_Write(Pin, Value);
 #endif
-#endif
-
-#ifdef JETSON
-#ifdef USE_DEV_LIB
-	SYSFS_GPIO_Write(Pin, Value);
-#elif USE_HARDWARE_LIB
-	Debug("not support");
-#endif
-#endif
 }
 
 UBYTE DEV_Digital_Read(UWORD Pin)
 {
 	UBYTE Read_value = 0;
-#ifdef RPI
+
 #ifdef USE_BCM2835_LIB
 	Read_value = bcm2835_gpio_lev(Pin);
 #elif USE_WIRINGPI_LIB
 	Read_value = digitalRead(Pin);
 #elif USE_DEV_LIB
 	Read_value = SYSFS_GPIO_Read(Pin);
-#endif
-#endif
-
-#ifdef JETSON
-#ifdef USE_DEV_LIB
-	Read_value = SYSFS_GPIO_Read(Pin);
-#elif USE_HARDWARE_LIB
-	Debug("not support");
-#endif
 #endif
 	return Read_value;
 }
@@ -94,7 +66,6 @@ UBYTE DEV_SPI_WriteByte(uint8_t Value)
 {
 	UBYTE temp = 0;
 	// printf("write %x \r\n", Value);
-#ifdef RPI
 #ifdef USE_BCM2835_LIB
 	temp = bcm2835_spi_transfer(Value);
 #elif USE_WIRINGPI_LIB
@@ -103,17 +74,8 @@ UBYTE DEV_SPI_WriteByte(uint8_t Value)
 #elif USE_DEV_LIB
 	temp = DEV_HARDWARE_SPI_TransferByte(Value);
 #endif
-#endif
 
 	// printf("[%s] [value: %d] [res: %d] \n", __PRETTY_FUNCTION__, Value, temp);
-
-#ifdef JETSON
-#ifdef USE_DEV_LIB
-	temp = SYSFS_software_spi_transfer(Value);
-#elif USE_HARDWARE_LIB
-	Debug("not support");
-#endif
-#endif
 	// printf("Read %x \r\n", temp);
 	return temp;
 }
@@ -128,7 +90,6 @@ UBYTE DEV_SPI_ReadByte(void)
 **/
 void DEV_GPIO_Mode(UWORD Pin, UWORD Mode)
 {
-#ifdef RPI
 #ifdef USE_BCM2835_LIB
 	if (Mode == 0 || Mode == BCM2835_GPIO_FSEL_INPT)
 	{
@@ -162,16 +123,6 @@ void DEV_GPIO_Mode(UWORD Pin, UWORD Mode)
 		// Debug("OUT Pin = %d\r\n",Pin);
 	}
 #endif
-#endif
-
-#ifdef JETSON
-#ifdef USE_DEV_LIB
-	SYSFS_GPIO_Export(Pin);
-	SYSFS_GPIO_Direction(Pin, Mode);
-#elif USE_HARDWARE_LIB
-	Debug("not support");
-#endif
-#endif
 }
 
 /**
@@ -182,7 +133,6 @@ void DEV_Delay_ms(UDOUBLE xms)
 
 // printf("%s %d ms \n", __PRETTY_FUNCTION__, xms);
 
-#ifdef RPI
 #ifdef USE_BCM2835_LIB
 	bcm2835_delay(xms);
 #elif USE_WIRINGPI_LIB
@@ -194,15 +144,7 @@ void DEV_Delay_ms(UDOUBLE xms)
 		usleep(1000);
 	}
 #endif
-#endif
 
-#ifdef JETSON
-	UDOUBLE i;
-	for (i = 0; i < xms; i++)
-	{
-		usleep(1000);
-	}
-#endif
 }
 
 static int DEV_Equipment_Testing(void)
@@ -235,7 +177,7 @@ static int DEV_Equipment_Testing(void)
 		}
 		break;
 	}
-#ifdef RPI
+
 	if (i < 5)
 	{
 		printf("Unrecognizable\r\n");
@@ -252,40 +194,12 @@ static int DEV_Equipment_Testing(void)
 			}
 		}
 	}
-#endif
-#ifdef JETSON
-	if (i < 5)
-	{
-		Debug("Unrecognizable\r\n");
-	}
-	else
-	{
-		char JETSON_System[10] = {"Ubuntu"};
-		for (i = 0; i < 6; i++)
-		{
-			if (JETSON_System[i] != value_str[i])
-			{
-				printf("Please make RPI !!!!!!!!!!\r\n");
-				return -1;
-			}
-		}
-	}
-#endif
+
 	return 0;
 }
 
 void DEV_GPIO_Init(void)
 {
-#ifdef RPI
-	DEV_RST_PIN = 18;
-	DEV_CS_PIN = 22;
-	DEV_DRDY_PIN = 17;
-#elif JETSON
-	DEV_RST_PIN = GPIO17;
-	DEV_CS_PIN = GPIO25;
-	DEV_DRDY_PIN = SPI0_CS0;
-#endif
-
 	DEV_GPIO_Mode(DEV_RST_PIN, 1);
 	DEV_GPIO_Mode(DEV_CS_PIN, 1);
 
@@ -306,7 +220,7 @@ UBYTE DEV_Module_Init(void)
 	{
 		return 1;
 	}
-#ifdef RPI
+
 #ifdef USE_BCM2835_LIB
 	if (!bcm2835_init())
 	{
@@ -348,22 +262,6 @@ UBYTE DEV_Module_Init(void)
 	DEV_HARDWARE_SPI_setSpeed(10000000);
 	DEV_HARDWARE_SPI_Mode(SPI_MODE_1);
 #endif
-
-#elif JETSON
-#ifdef USE_DEV_LIB
-	DEV_GPIO_Init();
-	printf("Software spi\r\n");
-	SYSFS_software_spi_begin();
-	SYSFS_software_spi_setBitOrder(SOFTWARE_SPI_MSBFIRST);
-	SYSFS_software_spi_setDataMode(SOFTWARE_SPI_Mode0);
-	SYSFS_software_spi_setClockDivider(SOFTWARE_SPI_CLOCK_DIV4);
-#elif USE_HARDWARE_LIB
-	printf("Write and read /dev/spidev0.0 \r\n");
-	DEV_GPIO_Init();
-	DEV_HARDWARE_SPI_begin("/dev/spidev0.0");
-#endif
-
-#endif
 	printf("/***********************************/ \r\n");
 	return 0;
 }
@@ -375,7 +273,6 @@ Info:
 ******************************************************************************/
 void DEV_Module_Exit(void)
 {
-#ifdef RPI
 #ifdef USE_BCM2835_LIB
 	DEV_Digital_Write(DEV_RST_PIN, LOW);
 	DEV_Digital_Write(DEV_CS_PIN, LOW);
@@ -389,16 +286,5 @@ void DEV_Module_Exit(void)
 	DEV_HARDWARE_SPI_end();
 	DEV_Digital_Write(DEV_RST_PIN, 0);
 	DEV_Digital_Write(DEV_CS_PIN, 0);
-#endif
-
-#elif JETSON
-#ifdef USE_DEV_LIB
-	SYSFS_GPIO_Unexport(DEV_RST_PIN);
-	SYSFS_GPIO_Unexport(DEV_CS_PIN);
-	SYSFS_GPIO_Unexport(DEV_DRDY_PIN);
-
-#elif USE_HARDWARE_LIB
-	Debug("not support");
-#endif
 #endif
 }

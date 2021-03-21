@@ -1,38 +1,49 @@
 #pragma once
 
-#include <tuple>
+#include <vector>
 #include <chrono>
 
 namespace adc 
 {
 
 using Signal = double;
-using SignalValues = std::tuple<Signal, Signal, Signal>;
+using SignalValues = std::vector<Signal>;
+using TimePoint = std::chrono::high_resolution_clock::time_point;
+using Gain = uint16_t;
 
-enum Channel : uint8_t {
-    FIRST  = 0,
-    SECOND = 1,
-    THIRD  = 2
+struct SignalData {
+    TimePoint time_point;
+    SignalValues values;
 };
 
 class AnalogDataReader {
 
 public:
-    AnalogDataReader() = default;
-    
+    AnalogDataReader(uint8_t channels) : _channels(channels) {};    
     virtual ~AnalogDataReader() = default;
 
-    constexpr uint64_t getUnixTimeStamp(const std::time_t *t)
+    virtual Signal getValue(const uint8_t & channel = 0) = 0;
+
+    virtual SignalData readData() = 0;
+
+    virtual uint8_t channels() { return _channels; }
+
+    virtual bool initialized() { return _initialized; }
+
+protected:
+
+    virtual TimePoint getTimePoint()
     {
-        //if specific time is not passed then get current time
-        std::time_t st = t == nullptr ? std::time(nullptr) : *t;
-        auto secs = static_cast<std::chrono::seconds>(st).count();
-        return static_cast<uint64_t>(secs);
+        return std::chrono::high_resolution_clock::now();
     }
 
-    virtual Signal getValue(const uint8_t channel = Channel::FIRST) = 0;
+    void setInitialized(bool v) { _initialized = v; }
 
-    virtual SignalValues readData() = 0;
+private:
+    uint8_t _channels;
+    bool _initialized;
 };
+
+using AnalogDataReaderPtr = std::shared_ptr<AnalogDataReader>;
 
 } // namespace adc

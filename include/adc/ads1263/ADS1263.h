@@ -27,16 +27,17 @@
 # THE SOFTWARE.
 #
 ******************************************************************************/
-#ifndef _ADS1263_H_
-#define _ADS1263_H_
+#pragma once
 
-#include "adc/ads1263/DEV_Config.h"
+#include "DEV_Config.h"
 
-#define Positive_A6	1
-#define Negative_A7	0
+namespace adc::ads1263 {
+
+constexpr auto Positive_A6	= 1;
+constexpr auto Negative_A7	= 0;
 	
-#define	Open	1 
-#define	Close	0
+constexpr auto	Open	= 1; 
+constexpr auto	Close	= 0;
 
 /* gain channel*/
 typedef enum
@@ -187,5 +188,7 @@ void ADS1263_SetMode(UBYTE Mode);
 void ADS1263_GetAll(UDOUBLE *ADC_Value);
 void ADS1263_GetAll_ADC2(UDOUBLE *ADC_Value);
 UDOUBLE ADS1263_RTD(ADS1263_DELAY delay, ADS1263_GAIN gain, ADS1263_DRATE drate);
+UDOUBLE ADS1263_GetChannalValue(UBYTE Channel);
 void ADS1263_DAC(ADS1263_DAC_VOLT volt, UBYTE isPositive, UBYTE isClose);
-#endif
+
+} // namespace adc::ads1263
