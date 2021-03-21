@@ -8,7 +8,7 @@ namespace adc
 
 using Signal = double;
 using SignalValues = std::vector<Signal>;
-using TimePoint = std::chrono::high_resolution_clock::time_point;
+using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds>;
 using Gain = uint16_t;
 
 struct SignalData {

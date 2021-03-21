@@ -98,7 +98,7 @@ int main(int argc, char **argv)
             {
                 output.precision(std::numeric_limits<adc::Signal>::digits10);
 
-                output << data.time_point << ",";
+                output << data.time_point.time_since_epoch().count() << ",";
                 
                 std::for_each(data.values.begin(), data.values.end(), [&](const adc::Signal & signal) {
                     output << std::fixed << signal << ",";
@@ -106,8 +106,14 @@ int main(int argc, char **argv)
 
                 output << std::endl;
 			}
-		}
+        }
 	});
+
+    while(true) {
+        spdlog::info("Elements in signal queue {}", signal_queue.size_approx()); 
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     producer.join();
     consumer.join();

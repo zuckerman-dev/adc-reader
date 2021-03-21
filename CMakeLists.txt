@@ -74,6 +74,7 @@ target_include_directories(${TARGET_ADS1263}
 
 set(TARGET_ADS1256 ads1256)
 add_library(${TARGET_ADS1256} SHARED ${SRC_ADS1256})
+target_compile_definitions(${TARGET_ADS1256} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
 target_link_libraries(${TARGET_ADS1256} PUBLIC bcm2835::bcm2835 ${TARGET_ADC})
 target_include_directories(${TARGET_ADS1256} 
         PRIVATE 
