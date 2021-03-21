@@ -11,9 +11,9 @@ AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(5)
 {
     DEV_Module_Init();
 
-    ADS1263_SetMode(1);
+    ads1263_hal.SetMode(1);
 
-    if(ADS1263_init() == 1) 
+    if(ads1263_hal.init() == 1) 
     {
         DEV_Module_Exit();
         exit(0);
@@ -31,7 +31,7 @@ adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
         return 0.0;
     }
 
-    UDOUBLE value = ADS1263_GetChannalValue(channel);
+    UDOUBLE value = ads1263_hal.GetChannalValue(channel);
 
     if((value >> 31) == 1) {
         return REF * 2 - value / 2147483648.0 * REF;		//7fffffff + 1

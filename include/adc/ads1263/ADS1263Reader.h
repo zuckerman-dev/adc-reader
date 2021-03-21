@@ -22,6 +22,8 @@ public:
 private:
     double _pga = 64;
     double _conversionFactor = 1;
+
+    ADS1263 ads1263_hal;
 };
 
 using AnalogDataReaderPtr = std::shared_ptr<AnalogDataReader>;
