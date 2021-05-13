@@ -2,7 +2,7 @@
 
 using namespace adc::ads1256;
 
-AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(4)
+AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(ADS1256::Channels)
 {
     DEV_Module_Init();
     DEV_Digital_Write(DEV_CS_PIN, 1);
@@ -10,10 +10,12 @@ AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(4)
     if (_ads1256_hal.init() == 1)
     {
         DEV_Module_Exit();
-        exit(0);
+        setInitialized(false);
     }
 
     DEV_Digital_Write(DEV_CS_PIN, 0);
+    
+    setInitialized(true);
 }
 
 AnalogDataReader::~AnalogDataReader() 
