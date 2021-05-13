@@ -43,6 +43,9 @@ constexpr auto	Close	= 0;
 class ADS1263 {
 
 public:
+	static constexpr auto Precision = 32;
+	static constexpr auto Channels = 5;
+
 	/* gain channel*/
 	enum Gain
 	{
@@ -193,9 +196,11 @@ public:
 	void 	GetAll_ADC2(UDOUBLE *ADC_Value);
 	UDOUBLE RTD(Delay delay, Gain gain, Drate drate);
 	UDOUBLE GetChannalValue(UBYTE Channel);
+	UDOUBLE GetDiffChannalValue(UBYTE Channel);
+
 	void 	DAC(DacVoltage volt, UBYTE isPositive, UBYTE isClose);
 
-protected: 
+// protected: 
 
 	void reset();
 	void WriteCmd(UBYTE Cmd);

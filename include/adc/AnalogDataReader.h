@@ -29,6 +29,7 @@ public:
     virtual uint8_t channels() const { return _channels; }
 
     virtual bool initialized() { return _initialized; }
+    virtual uint8_t chipID() { return _chipID; }
 
 protected:
 
@@ -37,11 +38,13 @@ protected:
         return std::chrono::high_resolution_clock::now();
     }
 
-    void setInitialized(bool v) { _initialized = v; }
+    void setInitialized(const bool & v) { _initialized = v; }
+    void setChipID(const uint8_t & id) { _chipID = id; }
 
 private:
     uint8_t _channels;
     bool _initialized;
+    uint8_t _chipID;
 };
 
 using AnalogDataReaderPtr = std::shared_ptr<AnalogDataReader>;

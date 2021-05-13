@@ -29,9 +29,8 @@ ConcurrentQueue<adc::SignalData> signal_queue;
 
 void Handler(int signo)
 {
+    spdlog::info("Exit signal received");
     exitSignal.set_value();
-    DEV_Module_Exit();
-    exit(0);
 }
 
 class AnalogDataReaderFactory {
@@ -76,12 +75,19 @@ int main(int argc, char **argv)
 
     adc::AnalogDataReaderPtr reader = AnalogDataReaderFactory::make(reader_type);
 
+    if(!reader->initialized()) {
+        spdlog::info("Not possible to initialize ADC");
+        return 1;
+    }
+
+    spdlog::info("ADS {} has been initialized", reader_type);
+
     std::future<void> futureObj = exitSignal.get_future();
 
     std::thread producer([&]() {
         spdlog::info("Starting reading thread");
 
-        while (futureObj.wait_for(std::chrono::microseconds(10)) == std::future_status::timeout)
+        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout)
         {
             signal_queue.enqueue(reader->readData());
         }
@@ -92,7 +98,15 @@ int main(int argc, char **argv)
 
         std::ofstream output(output_filename);
 
-        while (futureObj.wait_for(std::chrono::microseconds(10)) == std::future_status::timeout)
+        if(!output.is_open()) {
+            spdlog::info("Error opening file {}", output_filename);
+            exitSignal.set_value();
+            return;
+        }
+        
+        spdlog::info("Writing data to {}", output_filename);
+
+        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout)
         {
             adc::SignalData data;
 
@@ -111,11 +125,11 @@ int main(int argc, char **argv)
         }
 	});
 
-    while(true) {
-        spdlog::info("Elements in signal queue {}", signal_queue.size_approx()); 
+    // while(true) {
+    //     spdlog::info("Elements in signal queue {}", signal_queue.size_approx()); 
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    //     std::this_thread::sleep_for(std::chrono::seconds(1));
+    // }
 
     producer.join();
     consumer.join();

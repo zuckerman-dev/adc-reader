@@ -37,6 +37,9 @@ namespace adc::ads1256 {
 class ADS1256 {
 
 public:
+	static constexpr auto Precision = 25;
+	static constexpr auto Channels = 4;
+
 /* gain channel*/
 	enum Gain
 	{
