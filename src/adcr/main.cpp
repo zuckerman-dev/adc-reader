@@ -15,7 +15,7 @@
 
 #include <date/date.h>
 
-#include <concurrentqueue/concurrentqueue.h>
+#include <moodycamel/concurrentqueue.h>
 
 #include "adc/ads1256/ADS1256Reader.h"
 #include "adc/ads1263/ADS1263Reader.h"

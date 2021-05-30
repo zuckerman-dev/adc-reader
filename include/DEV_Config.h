@@ -41,10 +41,10 @@
 #include "pinout.h"
 
 #ifdef USE_BCM2835_LIB
-    #include <bcm2835/1/bcm2835.h>
+    #include <bcm2835.h>
 #elif USE_WIRINGPI_LIB
-    #include <WiringPi/2/wiringPi.h>
-    #include <WiringPi/2/wiringPiSPI.h>
+    #include <wiringPi.h>
+    #include <wiringPiSPI.h>
 #elif USE_DEV_LIB
     #include "RPI_sysfs_gpio.h"
     #include "dev_hardware_SPI.h"
