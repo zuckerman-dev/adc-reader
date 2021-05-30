@@ -47,8 +47,9 @@ find_package(date REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Threads REQUIRED)
 find_package(WiringPi REQUIRED)
-find_package(CLI11 CONFIG REQUIRED)
-find_package(bcm2835 CONFIG REQUIRED)
+find_package(CLI11 REQUIRED)
+find_package(bcm2835 REQUIRED)
+find_package(concurrentqueue REQUIRED)
 
 set(TARGET_ADC adc)
 add_library(${TARGET_ADC} SHARED ${SRC_ADC})
@@ -69,7 +70,7 @@ target_include_directories(${TARGET_ADS1263}
         PRIVATE 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1263}//>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1263}/>
 )
 
 set(TARGET_ADS1256 ads1256)
@@ -80,7 +81,7 @@ target_include_directories(${TARGET_ADS1256}
         PRIVATE 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}//>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/>
 )
 
 include(CMakePackageConfigHelpers)
@@ -239,6 +240,7 @@ target_link_libraries(${PROJECT_NAME}
         Threads::Threads 
         CLI11::CLI11 
         spdlog::spdlog 
+        concurrentqueue::concurrentqueue
         rt crypt m
 )
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
