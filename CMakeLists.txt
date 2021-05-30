@@ -130,13 +130,13 @@ write_basic_package_version_file(
 configure_package_config_file(adcConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1256}/${TARGET_ADS1256}Config.cmake
         INSTALL_DESTINATION 
-            ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1256}/
+            ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}/
 )
   
 configure_package_config_file(adcConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}Config.cmake
         INSTALL_DESTINATION 
-            ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1263}/
+            ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}/
 )
 
 configure_package_config_file(adcConfig.cmake.in
@@ -151,7 +151,7 @@ install(EXPORT ${TARGET_ADS1256}Targets
     NAMESPACE 
         "adc::"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1256}
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}
     COMPONENT
         Devel
 )
@@ -162,7 +162,7 @@ install(EXPORT ${TARGET_ADS1263}Targets
     NAMESPACE 
         "adc::"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1263}
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}
     COMPONENT
         Devel
 )
@@ -183,7 +183,7 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1256}/${TARGET_ADS1256}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1256}/${TARGET_ADS1256}ConfigVersion.cmake"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1256}
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}
     COMPONENT
         Devel
 )
@@ -193,7 +193,7 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADS1263}/${TARGET_ADS1263}ConfigVersion.cmake"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADS1263}
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}
     COMPONENT
         Devel
 )
