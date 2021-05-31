@@ -16,13 +16,10 @@ set(ADS1256_HEADERS
 set(ADS1263_HEADERS
     include/adc/ads1263/ADS1263.h
     include/adc/ads1263/ADS1263Reader.h
-    include/adc/ads1263/dev_hardware_SPI.h
-    include/adc/ads1263/RPI_sysfs_gpio.h
 )
 
 set(ADC_COMMON_HEADERS
     include/adc/AnalogDataReader.h
-    include/DEV_Config.h
 )
 
 set(SRC_ADS1256 
@@ -38,7 +35,7 @@ set(SRC_ADS1263
 )
 
 set(SRC_ADC 
-    src/DEV_Config
+    src/adc/device_config.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -56,33 +53,19 @@ add_library(${TARGET_ADC} SHARED ${SRC_ADC})
 target_link_libraries(${TARGET_ADC} PUBLIC bcm2835::bcm2835)
 target_compile_definitions(${TARGET_ADC} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
 target_include_directories(${TARGET_ADC} 
-        PRIVATE 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADC}/>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${TARGET_ADC}/>
 )
 
 set(TARGET_ADS1263 ads1263)
 add_library(${TARGET_ADS1263} SHARED ${SRC_ADS1263})
-target_link_libraries(${TARGET_ADS1263} PUBLIC bcm2835::bcm2835 ${TARGET_ADC})
-target_compile_definitions(${TARGET_ADS1263} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
-target_include_directories(${TARGET_ADS1263} 
-        PRIVATE 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1263}/>
-)
+target_link_libraries(${TARGET_ADS1263} PUBLIC ${TARGET_ADC})
 
 set(TARGET_ADS1256 ads1256)
 add_library(${TARGET_ADS1256} SHARED ${SRC_ADS1256})
-target_compile_definitions(${TARGET_ADS1256} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
-target_link_libraries(${TARGET_ADS1256} PUBLIC bcm2835::bcm2835 ${TARGET_ADC})
-target_include_directories(${TARGET_ADS1256} 
-        PRIVATE 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        PUBLIC 
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/adc/${TARGET_ADS1256}/>
-)
+target_link_libraries(${TARGET_ADS1256} PUBLIC ${TARGET_ADC})
 
 include(CMakePackageConfigHelpers)
 

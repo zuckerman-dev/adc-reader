@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "Debug.h"
 #include "pinout.h"
 
@@ -50,21 +51,14 @@
     #include "dev_hardware_SPI.h"
 #endif
 
-/**
- * data
-**/
-using UBYTE  = uint8_t;
-using UWORD =  uint16_t;
-using UDOUBLE = uint32_t;
-
 /*------------------------------------------------------------------------------------------------------*/
-void DEV_Digital_Write(UWORD Pin, UBYTE Value);
-UBYTE DEV_Digital_Read(UWORD Pin);
+void DEV_Digital_Write(uint16_t Pin, uint8_t Value);
+uint8_t DEV_Digital_Read(uint16_t Pin);
 
-UBYTE DEV_SPI_WriteByte(UBYTE Value);
-UBYTE DEV_SPI_ReadByte(void);
+uint8_t DEV_SPI_WriteByte(uint8_t Value);
+uint8_t DEV_SPI_ReadByte(void);
 
-UBYTE DEV_Module_Init(void);
+uint8_t DEV_Module_Init(void);
 void DEV_Module_Exit(void);
 
-void DEV_Delay_ms(UDOUBLE xms);
+void DEV_Delay_ms(uint32_t xms);

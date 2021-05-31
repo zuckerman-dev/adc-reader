@@ -33,7 +33,7 @@ adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
     //     return 0.0;
     // }
 
-    UDOUBLE value{}; 
+    uint32_t value{}; 
 
     assert(channel <= 4);
 
@@ -44,8 +44,8 @@ adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
 	DEV_Delay_ms(2);
 	ads1263_hal.WaitDRDY();
 
-    UBYTE buf[4] = {0, 0, 0, 0};
-	UBYTE Status, CRC;
+    uint8_t buf[4] = {0, 0, 0, 0};
+	uint8_t Status, CRC;
     DEV_Digital_Write(DEV_CS_PIN, 0);
 	do {
 		DEV_SPI_WriteByte(ADS1263::Cmd::CMD_RDATA1);
@@ -60,10 +60,10 @@ adc::Signal AnalogDataReader::getValue(const uint8_t & channel)
 	CRC = DEV_SPI_ReadByte();
 
     DEV_Digital_Write(DEV_CS_PIN, 1);
-    value |= ((UDOUBLE)buf[0] << 24);
-    value |= ((UDOUBLE)buf[1] << 16);
-    value |= ((UDOUBLE)buf[2] << 8);
-	value |= (UDOUBLE)buf[3];
+    value |= ((uint32_t)buf[0] << 24);
+    value |= ((uint32_t)buf[1] << 16);
+    value |= ((uint32_t)buf[2] << 8);
+	value |= (uint32_t)buf[3];
 
     if((value >> 31) == 1) {
         return REF * 2 - value / 2147483648.0 * REF;		//7fffffff + 1
