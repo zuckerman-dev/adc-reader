@@ -29,7 +29,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "DEV_Config.h"
+#include "adc/device_config.h"
 
 namespace adc::ads1263 {
 
@@ -190,42 +190,42 @@ public:
 		CMD_WREG2	= 0x00,	// number of registers to write minus 1, 000n nnnn
 	};
 
-	UBYTE 	init(void);
-	void 	SetMode(UBYTE Mode);
-	void 	GetAll(UDOUBLE *ADC_Value);
-	void 	GetAll_ADC2(UDOUBLE *ADC_Value);
-	UDOUBLE RTD(Delay delay, Gain gain, Drate drate);
-	UDOUBLE GetChannalValue(UBYTE Channel);
-	UDOUBLE GetDiffChannalValue(UBYTE Channel);
+	uint8_t 	init(void);
+	void 	SetMode(uint8_t Mode);
+	void 	GetAll(uint32_t *ADC_Value);
+	void 	GetAll_ADC2(uint32_t *ADC_Value);
+	uint32_t RTD(Delay delay, Gain gain, Drate drate);
+	uint32_t GetChannalValue(uint8_t Channel);
+	uint32_t GetDiffChannalValue(uint8_t Channel);
 
-	void 	DAC(DacVoltage volt, UBYTE isPositive, UBYTE isClose);
+	void 	DAC(DacVoltage volt, uint8_t isPositive, uint8_t isClose);
 
 // protected: 
 
 	void reset();
-	void WriteCmd(UBYTE Cmd);
-	void WriteReg(UBYTE Reg, UBYTE data);
-	UBYTE Read_data(UBYTE Reg);
-	UBYTE Checksum(UDOUBLE val, UBYTE byt);
+	void WriteCmd(uint8_t Cmd);
+	void WriteReg(uint8_t Reg, uint8_t data);
+	uint8_t Read_data(uint8_t Reg);
+	uint8_t Checksum(uint32_t val, uint8_t byt);
 	void WaitDRDY();
-	UBYTE ReadChipID();
+	uint8_t ReadChipID();
 
-	void SetChannal(UBYTE Channal);
-	void SetChannal_ADC2(UBYTE Channal);
-	void SetDiffChannal(UBYTE Channal);
-	void SetDiffChannal_ADC2(UBYTE Channal);
-	UDOUBLE Read_ADC1_Data();
-	UDOUBLE Read_ADC2_Data();
-	UDOUBLE GetChannalValue_ADC2(UBYTE Channel);
+	void SetChannal(uint8_t Channal);
+	void SetChannal_ADC2(uint8_t Channal);
+	void SetDiffChannal(uint8_t Channal);
+	void SetDiffChannal_ADC2(uint8_t Channal);
+	uint32_t Read_ADC1_Data();
+	uint32_t Read_ADC2_Data();
+	uint32_t GetChannalValue_ADC2(uint8_t Channel);
 
 	void ConfigADC1(ADS1263::Gain gain, ADS1263::Drate drate);	
 	void ConfigADC2(ADS1263::Adc2Gain gain, ADS1263::Adc2Drate drate);
 
-	UDOUBLE Rtd(Delay delay, Gain gain, Drate drate);
-	void Dac(DacVoltage volt, UBYTE isPositive, UBYTE isOpen);
+	uint32_t Rtd(Delay delay, Gain gain, Drate drate);
+	void Dac(DacVoltage volt, uint8_t isPositive, uint8_t isOpen);
 
 private:
-	UBYTE ScanMode = 0;
+	uint8_t ScanMode = 0;
 
 };
 

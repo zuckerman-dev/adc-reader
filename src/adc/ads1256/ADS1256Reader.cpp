@@ -1,5 +1,7 @@
 #include "adc/ads1256/ADS1256Reader.h"
 
+#include "adc/device_config.h"
+
 using namespace adc::ads1256;
 
 AnalogDataReader::AnalogDataReader() : adc::AnalogDataReader(ADS1256::Channels)

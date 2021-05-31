@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 class AdcReaderConan(ConanFile):
-   name = "adc-reader"
+   name = "adc"
    version = "0.0.1"
    settings = "os", "compiler", "build_type", "arch"
    requires = "date/3.0.0",  \

@@ -27,13 +27,14 @@
 # THE SOFTWARE.
 #
 ******************************************************************************/
-#include "DEV_Config.h"
 #include <fcntl.h>
+
+#include "device_config.h"
 
 /**
  * GPIO read and write
 **/
-void DEV_Digital_Write(UWORD Pin, UBYTE Value)
+void DEV_Digital_Write(uint16_t Pin, uint8_t Value)
 {
 // printf("%s pin %d value %d \n", __PRETTY_FUNCTION__, Pin, Value);
 #ifdef USE_BCM2835_LIB
@@ -45,9 +46,9 @@ void DEV_Digital_Write(UWORD Pin, UBYTE Value)
 #endif
 }
 
-UBYTE DEV_Digital_Read(UWORD Pin)
+uint8_t DEV_Digital_Read(uint16_t Pin)
 {
-	UBYTE Read_value = 0;
+	uint8_t Read_value = 0;
 
 #ifdef USE_BCM2835_LIB
 	Read_value = bcm2835_gpio_lev(Pin);
@@ -62,9 +63,9 @@ UBYTE DEV_Digital_Read(UWORD Pin)
 /**
  * SPI
 **/
-UBYTE DEV_SPI_WriteByte(uint8_t Value)
+uint8_t DEV_SPI_WriteByte(uint8_t Value)
 {
-	UBYTE temp = 0;
+	uint8_t temp = 0;
 	// printf("write %x \r\n", Value);
 #ifdef USE_BCM2835_LIB
 	temp = bcm2835_spi_transfer(Value);
@@ -80,7 +81,7 @@ UBYTE DEV_SPI_WriteByte(uint8_t Value)
 	return temp;
 }
 
-UBYTE DEV_SPI_ReadByte(void)
+uint8_t DEV_SPI_ReadByte(void)
 {
 	return DEV_SPI_WriteByte(0x00);
 }
@@ -88,7 +89,7 @@ UBYTE DEV_SPI_ReadByte(void)
 /**
  * GPIO Mode
 **/
-void DEV_GPIO_Mode(UWORD Pin, UWORD Mode)
+void DEV_GPIO_Mode(uint16_t Pin, uint16_t Mode)
 {
 #ifdef USE_BCM2835_LIB
 	if (Mode == 0 || Mode == BCM2835_GPIO_FSEL_INPT)
@@ -128,7 +129,7 @@ void DEV_GPIO_Mode(UWORD Pin, UWORD Mode)
 /**
  * delay x ms
 **/
-void DEV_Delay_ms(UDOUBLE xms)
+void DEV_Delay_ms(uint32_t xms)
 {
 
 // printf("%s %d ms \n", __PRETTY_FUNCTION__, xms);
@@ -138,7 +139,7 @@ void DEV_Delay_ms(UDOUBLE xms)
 #elif USE_WIRINGPI_LIB
 	delay(xms);
 #elif USE_DEV_LIB
-	UDOUBLE i;
+	uint32_t i;
 	for (i = 0; i < xms; i++)
 	{
 		usleep(1000);
@@ -213,7 +214,7 @@ function:	Module Initialize, the library and initialize the pins, SPI protocol
 parameter:
 Info:
 ******************************************************************************/
-UBYTE DEV_Module_Init(void)
+uint8_t DEV_Module_Init(void)
 {
 	printf("/***********************************/ \r\n");
 	if (DEV_Equipment_Testing() < 0)

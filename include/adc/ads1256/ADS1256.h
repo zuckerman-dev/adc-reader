@@ -30,7 +30,6 @@
 #pragma once
 
 #include <array>
-#include "DEV_Config.h"
 
 namespace adc::ads1256 {
 
@@ -113,28 +112,28 @@ public:
 	};
 
 
-	UBYTE init(void);
-	void SetMode(UBYTE Mode);
-	UDOUBLE Read_ADC_Data_Lite(void);
+	uint8_t init(void);
+	void SetMode(uint8_t Mode);
+	uint32_t Read_ADC_Data_Lite(void);
 	void ConfigADC(Gain gain, Drate drate);
-	UDOUBLE GetChannalValue(UBYTE Channel);
-	void GetAll(UDOUBLE *ADC_Value);
+	uint32_t GetChannalValue(uint8_t Channel);
+	void GetAll(uint32_t *ADC_Value);
 
 protected: 
 
 	void reset();
 
-	void WriteCmd(UBYTE Cmd);
-	void WriteReg(UBYTE Reg, UBYTE data);
+	void WriteCmd(uint8_t Cmd);
+	void WriteReg(uint8_t Reg, uint8_t data);
 
 	void WaitDRDY();
 
-	UBYTE ReadChipID();
-	UBYTE Read_data(UBYTE Reg);
-	UDOUBLE Read_ADC_Data();
+	uint8_t ReadChipID();
+	uint8_t Read_data(uint8_t Reg);
+	uint32_t Read_ADC_Data();
 
-	void SetChannal(UBYTE Channal);
-	void SetDiffChannal(UBYTE Channal);
+	void SetChannal(uint8_t Channal);
+	void SetDiffChannal(uint8_t Channal);
 
 private: 
 	const std::array<uint8_t, Drate::ADS1256_DRATE_MAX> drate_e =
@@ -157,7 +156,7 @@ private:
 		0x03
 	};
 
-	UBYTE ScanMode = 0;
+	uint8_t ScanMode = 0;
 
 };
 
