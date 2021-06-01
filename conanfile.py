@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 class AdcReaderConan(ConanFile):
-   name = "adc"
+   name = "adcr"
    version = "0.0.1"
    settings = "os", "compiler", "build_type", "arch"
    requires = "date/3.0.0",  \
@@ -32,10 +32,7 @@ class AdcReaderConan(ConanFile):
 
    def package_info(self):
       # Ordered list of include paths
-      self.cpp_info.includedirs = ['include/adc/', \
-                                 'include/adc/ads1256', \
-                                 'include/adc/ads1263' \
-                                 ]  
+      self.cpp_info.includedirs = [f'include/{self.name}']  
       self.cpp_info.libs = tools.collect_libs(self)
       
    def imports(self):
