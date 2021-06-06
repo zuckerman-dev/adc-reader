@@ -1,15 +1,15 @@
-#include <ctime>
-#include <cstdio>
-#include <string>
 #include <chrono>
+#include <cstdio>
+#include <ctime>
 #include <signal.h>
+#include <string>
 
 #include <iostream>
 
-#include <CLI/Error.hpp>
 #include <CLI/App.hpp>
-#include <CLI/Formatter.hpp>
 #include <CLI/Config.hpp>
+#include <CLI/Error.hpp>
+#include <CLI/Formatter.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -35,38 +35,36 @@ void Handler(int signo)
 
 class AnalogDataReaderFactory {
 public:
-    static adc::AnalogDataReaderPtr make(const std::string & type) {
+    static adc::AnalogDataReaderPtr make(const std::string& type)
+    {
 
         spdlog::info("Initialization of reader object for {}", type);
 
-        adc::AnalogDataReaderPtr reader{nullptr};
+        adc::AnalogDataReaderPtr reader{ nullptr };
 
-        if(type == "ads1256") 
-        {
+        if (type == "ads1256") {
             reader = std::make_shared<adc::ads1256::AnalogDataReader>();
-        } 
-        else if(type == "ads1263") 
-        {
+        } else if (type == "ads1263") {
             reader = std::make_shared<adc::ads1263::AnalogDataReader>();
-        } 
+        }
 
         return reader;
     }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    CLI::App app{"AD1256 differential analog input test application"};
+    CLI::App app{ "AD1256 differential analog input test application" };
 
     uint32_t adc_gain, adc_sampling_rate;
-    std::string output_filename{}; 
+    std::string output_filename{};
     long duration{};
-    std::string reader_type{"ads1256"};
+    std::string reader_type{ "ads1256" };
 
     app.add_option("-g,--gain", adc_gain, "Gain");
     app.add_option("-r,--sampling_rate", adc_gain, "Sampling rate");
-    app.add_option("-o,--output",output_filename, "Path to the output file");
-    app.add_option("-d,--duration",duration,"Recording duration");
+    app.add_option("-o,--output", output_filename, "Path to the output file");
+    app.add_option("-d,--duration", duration, "Recording duration");
     app.add_option("-t,--type", reader_type, "ADC Chip (ads1256 or ads1263)");
 
     CLI11_PARSE(app, argc, argv);
@@ -75,7 +73,7 @@ int main(int argc, char **argv)
 
     adc::AnalogDataReaderPtr reader = AnalogDataReaderFactory::make(reader_type);
 
-    if(!reader->initialized()) {
+    if (!reader->initialized()) {
         spdlog::info("Not possible to initialize ADC");
         return 1;
     }
@@ -87,8 +85,7 @@ int main(int argc, char **argv)
     std::thread producer([&]() {
         spdlog::info("Starting reading thread");
 
-        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout)
-        {
+        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout) {
             signal_queue.enqueue(reader->readData());
         }
     });
@@ -98,38 +95,30 @@ int main(int argc, char **argv)
 
         std::ofstream output(output_filename);
 
-        if(!output.is_open()) {
+        if (!output.is_open()) {
             spdlog::info("Error opening file {}", output_filename);
             exitSignal.set_value();
             return;
         }
-        
+
         spdlog::info("Writing data to {}", output_filename);
 
-        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout)
-        {
+        while (futureObj.wait_for(std::chrono::microseconds(5)) == std::future_status::timeout) {
             adc::SignalData data;
 
-			if (signal_queue.try_dequeue(data)) 
-            {
+            if (signal_queue.try_dequeue(data)) {
                 output.precision(std::numeric_limits<adc::Signal>::digits10);
 
                 output << data.time_point.time_since_epoch().count() << ",";
-                
-                std::for_each(data.values.begin(), data.values.end(), [&](const adc::Signal & signal) {
+
+                std::for_each(data.values.begin(), data.values.end(), [&](const adc::Signal& signal) {
                     output << std::fixed << signal << ",";
                 });
 
                 output << std::endl;
-			}
+            }
         }
-	});
-
-    // while(true) {
-    //     spdlog::info("Elements in signal queue {}", signal_queue.size_approx()); 
-
-    //     std::this_thread::sleep_for(std::chrono::seconds(1));
-    // }
+    });
 
     producer.join();
     consumer.join();

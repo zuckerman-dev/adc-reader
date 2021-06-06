@@ -28,6 +28,7 @@
 #
 ******************************************************************************/
 #include <fcntl.h>
+#include <spdlog/spdlog.h>
 
 #include "device_config.h"
 
@@ -36,7 +37,7 @@
 **/
 void DEV_Digital_Write(uint16_t Pin, uint8_t Value)
 {
-// printf("%s pin %d value %d \n", __PRETTY_FUNCTION__, Pin, Value);
+// spdlog::trace("%s pin %d value %d \n", __PRETTY_FUNCTION__, Pin, Value);
 #ifdef USE_BCM2835_LIB
 	bcm2835_gpio_write(Pin, Value);
 #elif USE_WIRINGPI_LIB
@@ -66,7 +67,7 @@ uint8_t DEV_Digital_Read(uint16_t Pin)
 uint8_t DEV_SPI_WriteByte(uint8_t Value)
 {
 	uint8_t temp = 0;
-	// printf("write %x \r\n", Value);
+	// spdlog::trace("write %x \r\n", Value);
 #ifdef USE_BCM2835_LIB
 	temp = bcm2835_spi_transfer(Value);
 #elif USE_WIRINGPI_LIB
@@ -76,8 +77,8 @@ uint8_t DEV_SPI_WriteByte(uint8_t Value)
 	temp = DEV_HARDWARE_SPI_TransferByte(Value);
 #endif
 
-	// printf("[%s] [value: %d] [res: %d] \n", __PRETTY_FUNCTION__, Value, temp);
-	// printf("Read %x \r\n", temp);
+	// spdlog::trace("[%s] [value: %d] [res: %d] \n", __PRETTY_FUNCTION__, Value, temp);
+	// spdlog::trace("Read %x \r\n", temp);
 	return temp;
 }
 
@@ -132,7 +133,7 @@ void DEV_GPIO_Mode(uint16_t Pin, uint16_t Mode)
 void DEV_Delay_ms(uint32_t xms)
 {
 
-// printf("%s %d ms \n", __PRETTY_FUNCTION__, xms);
+// spdlog::trace("%s %d ms \n", __PRETTY_FUNCTION__, xms);
 
 #ifdef USE_BCM2835_LIB
 	bcm2835_delay(xms);
@@ -154,7 +155,7 @@ static int DEV_Equipment_Testing(void)
 	int fd;
 	char value_str[20];
 	fd = open("/etc/issue", O_RDONLY);
-	printf("Current environment: ");
+	spdlog::trace("Current environment: ");
 	while (1)
 	{
 		if (fd < 0)
@@ -171,17 +172,17 @@ static int DEV_Equipment_Testing(void)
 			}
 			if (value_str[i] == 32)
 			{
-				printf("\r\n");
+				spdlog::trace("\r\n");
 				break;
 			}
-			printf("%c", value_str[i]);
+			spdlog::trace("%c", value_str[i]);
 		}
 		break;
 	}
 
 	if (i < 5)
 	{
-		printf("Unrecognizable\r\n");
+		spdlog::trace("Unrecognizable\r\n");
 	}
 	else
 	{
@@ -190,7 +191,7 @@ static int DEV_Equipment_Testing(void)
 		{
 			if (RPI_System[i] != value_str[i])
 			{
-				printf("Please make JETSON !!!!!!!!!!\r\n");
+				spdlog::trace("Please make JETSON !!!!!!!!!!\r\n");
 				return -1;
 			}
 		}
@@ -216,7 +217,7 @@ Info:
 ******************************************************************************/
 uint8_t DEV_Module_Init(void)
 {
-	printf("/***********************************/ \r\n");
+	spdlog::trace("/***********************************/ \r\n");
 	if (DEV_Equipment_Testing() < 0)
 	{
 		return 1;
@@ -225,12 +226,12 @@ uint8_t DEV_Module_Init(void)
 #ifdef USE_BCM2835_LIB
 	if (!bcm2835_init())
 	{
-		printf("bcm2835 init failed  !!! \r\n");
+		spdlog::trace("bcm2835 init failed  !!! \r\n");
 		return 1;
 	}
 	else
 	{
-		printf("bcm2835 init success !!! \r\n");
+		spdlog::trace("bcm2835 init success !!! \r\n");
 	}
 
 	// GPIO Config
@@ -244,12 +245,12 @@ uint8_t DEV_Module_Init(void)
 	// if(wiringPiSetup() < 0) {//use wiringpi Pin number table
 	if (wiringPiSetupGpio() < 0)
 	{ //use BCM2835 Pin number table
-		printf("set wiringPi lib failed	!!! \r\n");
+		spdlog::trace("set wiringPi lib failed	!!! \r\n");
 		return 1;
 	}
 	else
 	{
-		printf("set wiringPi lib success !!! \r\n");
+		spdlog::trace("set wiringPi lib success !!! \r\n");
 	}
 
 	// GPIO Config
@@ -257,13 +258,13 @@ uint8_t DEV_Module_Init(void)
 	// wiringPiSPISetup(0,10000000);
 	wiringPiSPISetupMode(0, 1000000, 1);
 #elif USE_DEV_LIB
-	printf("Write and read /dev/spidev0.0 \r\n");
+	spdlog::trace("Write and read /dev/spidev0.0 \r\n");
 	DEV_GPIO_Init();
 	DEV_HARDWARE_SPI_begin("/dev/spidev0.0");
 	DEV_HARDWARE_SPI_setSpeed(10000000);
 	DEV_HARDWARE_SPI_Mode(SPI_MODE_1);
 #endif
-	printf("/***********************************/ \r\n");
+	spdlog::trace("/***********************************/ \r\n");
 	return 0;
 }
 

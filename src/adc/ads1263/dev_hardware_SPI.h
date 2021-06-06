@@ -35,7 +35,7 @@
 
 #define DEV_HARDWARE_SPI_DEBUG 0
 #if DEV_HARDWARE_SPI_DEBUG
-#define DEV_HARDWARE_SPI_Debug(__info,...) printf("Debug: " __info,##__VA_ARGS__)
+#define DEV_HARDWARE_SPI_Debug(__info,...) spdlog::trace("Debug: " __info,##__VA_ARGS__)
 #else
 #define DEV_HARDWARE_SPI_Debug(__info,...)
 #endif

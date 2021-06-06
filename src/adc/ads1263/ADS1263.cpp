@@ -29,6 +29,8 @@
 ******************************************************************************/
 #include "adc/ads1263/ADS1263.h"
 
+#include <spdlog/spdlog.h>
+
 #include <cassert>
 
 using namespace adc::ads1263;
@@ -40,7 +42,7 @@ Info:
 ******************************************************************************/
 void ADS1263::reset()
 {
-	// printf("%s \n", __PRETTY_FUNCTION__);
+	// spdlog::trace("%s \n", __PRETTY_FUNCTION__);
 
     DEV_Digital_Write(DEV_RST_PIN, 1);
     DEV_Delay_ms(300);
@@ -96,7 +98,7 @@ uint8_t ADS1263::Read_data(uint8_t Reg)
     temp = DEV_SPI_ReadByte();
     DEV_Digital_Write(DEV_CS_PIN, 1);
 
-	// printf("Read data %d \n", temp);
+	// spdlog::trace("Read data %d \n", temp);
 
     return temp;
 }
@@ -118,7 +120,7 @@ uint8_t ADS1263::Checksum(uint32_t val, uint8_t byt)
 		val >>= 8;			// shift down
 	}
 	sum += 0x9b;
-	// printf("--- %x %x--- \r\n", sum, byt);
+	// spdlog::trace("--- %x %x--- \r\n", sum, byt);
 	return sum ^ byt;		// if equal, this will be 0
 }
 
@@ -130,7 +132,7 @@ Info:
 ******************************************************************************/
 void ADS1263::WaitDRDY()
 {
-	// printf("ADS1263::WaitDRDY \r\n");
+	// spdlog::trace("ADS1263::WaitDRDY \r\n");
     uint32_t i = 0;
     for(i=0;i<4000000;i++) {
 		DEV_Delay_ms(1);
@@ -138,9 +140,9 @@ void ADS1263::WaitDRDY()
             break;
     }
     if(i >= 4000000) {
-       printf("Time Out ...\r\n"); 
+       spdlog::trace("Time Out ...\r\n"); 
     }	
-	// printf("ADS1263::WaitDRDY Release \r\n");
+	// spdlog::trace("ADS1263::WaitDRDY Release \r\n");
 }
 
 /******************************************************************************
@@ -150,12 +152,12 @@ Info:
 ******************************************************************************/
 uint8_t ADS1263::ReadChipID()
 {
-	// printf("%s \n", __PRETTY_FUNCTION__);
+	// spdlog::trace("%s \n", __PRETTY_FUNCTION__);
 
     uint8_t id;
     id = Read_data(ADS1263::Reg::REG_ID);
 
-	// printf("ChipID: %d \n", id);
+	// spdlog::trace("ChipID: %d \n", id);
 
     return id>>5;
 }
@@ -191,11 +193,11 @@ void ADS1263::ConfigADC1(ADS1263::Gain gain, ADS1263::Drate drate)
     DEV_Delay_ms(1);
 	if(Read_data(ADS1263::Reg::REG_MODE2) == MODE2)
 	{
-		printf("ADS1263::Reg::REG_MODE2 success \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE2 success \r\n");
 	}
 	else
 	{
-		printf("ADS1263::Reg::REG_MODE2 unsuccess \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE2 unsuccess \r\n");
 	}
 	
 	uint8_t REFMUX = 0x24;		//0x00:+-2.5V as REF, 0x24:VDD,VSS as REF
@@ -203,11 +205,11 @@ void ADS1263::ConfigADC1(ADS1263::Gain gain, ADS1263::Drate drate)
 	DEV_Delay_ms(1);
 	if(Read_data(ADS1263::Reg::REG_REFMUX) == REFMUX)
 	{
-		printf("ADS1263::Reg::REG_REFMUX success \r\n");
+		spdlog::trace("ADS1263::Reg::REG_REFMUX success \r\n");
 	}
 	else
 	{
-		printf("ADS1263::Reg::REG_REFMUX unsuccess \r\n");
+		spdlog::trace("ADS1263::Reg::REG_REFMUX unsuccess \r\n");
 	}
 	
 	uint8_t MODE0 = ADS1263::Delay::ADS1263_DELAY_8d8ms;
@@ -215,11 +217,11 @@ void ADS1263::ConfigADC1(ADS1263::Gain gain, ADS1263::Drate drate)
 	DEV_Delay_ms(1);
 	if(Read_data(ADS1263::Reg::REG_MODE0) == MODE0)
 	{
-		printf("ADS1263::Reg::REG_MODE0 success \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE0 success \r\n");
 	}
 	else
 	{
-		printf("ADS1263::Reg::REG_MODE0 unsuccess \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE0 unsuccess \r\n");
 	}
 }
 
@@ -240,11 +242,11 @@ void ADS1263::ConfigADC2(ADS1263::Adc2Gain gain, ADS1263::Adc2Drate drate)
 
 	if(Read_data(ADS1263::Reg::REG_ADC2CFG) == ADC2CFG)
 	{
-		printf("ADS1263::Reg::REG_ADC2CFG success \r\n");
+		spdlog::trace("ADS1263::Reg::REG_ADC2CFG success \r\n");
 	}
 	else
 	{
-		printf("ADS1263::Reg::REG_ADC2CFG unsuccess \r\n");
+		spdlog::trace("ADS1263::Reg::REG_ADC2CFG unsuccess \r\n");
 	}
 	
 	uint8_t MODE0 = ADS1263::Delay::ADS1263_DELAY_8d8ms;
@@ -253,11 +255,11 @@ void ADS1263::ConfigADC2(ADS1263::Adc2Gain gain, ADS1263::Adc2Drate drate)
 
 	if(Read_data(ADS1263::Reg::REG_MODE0) == MODE0)
 	{
-		printf("ADS1263::Reg::REG_MODE0 success \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE0 success \r\n");
 	}
 	else
 	{
-		printf("ADS1263::Reg::REG_MODE0 unsuccess \r\n");
+		spdlog::trace("ADS1263::Reg::REG_MODE0 unsuccess \r\n");
 	}
 }
 
@@ -268,17 +270,17 @@ Info:
 ******************************************************************************/
 uint8_t ADS1263::init()
 {
-	printf("%s \n", __PRETTY_FUNCTION__);
+	spdlog::trace("%s \n", __PRETTY_FUNCTION__);
 
     reset();
 	uint8_t chip_id = ReadChipID();
     if(chip_id == 1) 
 	{
-        printf("ID Read success: %d \r\n", chip_id);
+        spdlog::trace("ID Read success: %d \r\n", chip_id);
     } 
 	else 
 	{
-        printf("ID Read failed: %d \r\n", chip_id);
+        spdlog::trace("ID Read failed: %d \r\n", chip_id);
         return 1;
     }
 	WriteCmd(CMD_STOP1);
@@ -308,11 +310,11 @@ void ADS1263::SetChannal(uint8_t Channal)
 	
 	if(Read_data(ADS1263::Reg::REG_INPMUX) == INPMUX) 
 	{
-		// printf("ADC1_SetChannal success \r\n");
+		// spdlog::trace("ADC1_SetChannal success \r\n");
 	} 
 	else 
 	{
-		printf("ADC1_SetChannal unsuccess \r\n");
+		spdlog::trace("ADC1_SetChannal unsuccess \r\n");
 	}
 }
 
@@ -330,9 +332,9 @@ void ADS1263::SetChannal_ADC2(uint8_t Channal)
 	uint8_t INPMUX = (Channal << 4) | 0x0a;		//0x0a:VCOM as Negative Input
     WriteReg(ADS1263::Reg::REG_ADC2MUX, INPMUX);
 	if(Read_data(ADS1263::Reg::REG_ADC2MUX) == INPMUX) {
-		// printf("ADC2_SetChannal success \r\n");
+		// spdlog::trace("ADC2_SetChannal success \r\n");
 	} else {
-		printf("ADC2_SetChannal unsuccess \r\n");
+		spdlog::trace("ADC2_SetChannal unsuccess \r\n");
 	}
 }
 
@@ -358,9 +360,9 @@ void ADS1263::SetDiffChannal(uint8_t Channal)
     }
 	WriteReg(ADS1263::Reg::REG_INPMUX, INPMUX); 	
 	if(Read_data(ADS1263::Reg::REG_INPMUX) == INPMUX) {
-		// printf("SetDiffChannal success \r\n");
+		// spdlog::trace("SetDiffChannal success \r\n");
 	} else {
-		printf("SetDiffChannal unsuccess \r\n");
+		spdlog::trace("SetDiffChannal unsuccess \r\n");
 	}
 }
 
@@ -386,9 +388,9 @@ void ADS1263::SetDiffChannal_ADC2(uint8_t Channal)
     }
 	WriteReg(ADS1263::Reg::REG_ADC2MUX, INPMUX); 	
 	if(Read_data(ADS1263::Reg::REG_ADC2MUX) == INPMUX) {
-		// printf("SetDiffChannal_ADC2 success \r\n");
+		// spdlog::trace("SetDiffChannal_ADC2 success \r\n");
 	} else {
-		printf("SetDiffChannal_ADC2 unsuccess \r\n");
+		spdlog::trace("SetDiffChannal_ADC2 unsuccess \r\n");
 	}
 }
 
@@ -419,9 +421,9 @@ uint32_t ADS1263::Read_ADC1_Data()
     read |= ((uint32_t)buf[1] << 16);
     read |= ((uint32_t)buf[2] << 8);
 	read |= (uint32_t)buf[3];
-    // printf("%x %x %x %x %x %x\r\n", Status, buf[0], buf[1], buf[2], buf[3], CRC);
+    // spdlog::trace("%x %x %x %x %x %x\r\n", Status, buf[0], buf[1], buf[2], buf[3], CRC);
 	if(Checksum(read, CRC) != 0)
-		printf("ADC1 Data read error! \r\n");
+		spdlog::trace("ADC1 Data read error! \r\n");
     return read;
 }
 
@@ -452,9 +454,9 @@ uint32_t ADS1263::Read_ADC2_Data()
     read |= ((uint32_t)buf[0] << 16);
     read |= ((uint32_t)buf[1] << 8);
 	read |= (uint32_t)buf[2];
-    // printf("%x %x %x %x %x\r\n", Status, buf[0], buf[1], buf[2], CRC);
+    // spdlog::trace("%x %x %x %x %x\r\n", Status, buf[0], buf[1], buf[2], CRC);
 	if(Checksum(read, CRC) != 0)
-		printf("ADC2 Data read error! \r\n");
+		spdlog::trace("ADC2 Data read error! \r\n");
     return read;
 }
 
@@ -488,7 +490,7 @@ uint32_t ADS1263::GetChannalValue(uint8_t Channel)
 		WaitDRDY();
         Value = Read_ADC1_Data();
     }
-	// printf("Get IN%d value success \r\n", Channel);
+	// spdlog::trace("Get IN%d value success \r\n", Channel);
     return Value;
 }
 
@@ -536,7 +538,7 @@ uint32_t ADS1263::GetChannalValue_ADC2(uint8_t Channel)
         DEV_Delay_ms(2);
         Value = Read_ADC2_Data();
     }
-	// printf("Get IN%d value success \r\n", Channel);
+	// spdlog::trace("Get IN%d value success \r\n", Channel);
     return Value;
 }
 
@@ -554,7 +556,7 @@ void ADS1263::GetAll(uint32_t *ADC_Value)
 		WriteCmd(CMD_STOP1);
 		DEV_Delay_ms(20);
     }
-	// printf("----------Read ADC1 value success----------\r\n");
+	// spdlog::trace("----------Read ADC1 value success----------\r\n");
 }
 
 /******************************************************************************
@@ -571,7 +573,7 @@ void ADS1263::GetAll_ADC2(uint32_t *ADC_Value)
 		WriteCmd(CMD_STOP2);
 		DEV_Delay_ms(20);
     }
-	// printf("----------Read ADC2 value success----------\r\n");
+	// spdlog::trace("----------Read ADC2 value success----------\r\n");
 }
 
 /******************************************************************************
