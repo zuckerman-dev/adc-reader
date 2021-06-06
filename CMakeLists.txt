@@ -36,7 +36,7 @@ find_package(CLI11 REQUIRED)
 find_package(bcm2835 REQUIRED)
 find_package(concurrentqueue REQUIRED)
 
-set(TARGET_ADC adc)
+set(TARGET_ADC ${PROJECT_NAME})
 add_library(${TARGET_ADC} SHARED ${ADC_SOURCES})
 target_link_libraries(${TARGET_ADC} PUBLIC bcm2835::bcm2835)
 target_compile_definitions(${TARGET_ADC} PUBLIC -DRPI=1 -DUSE_BCM2835_LIB=1)
@@ -65,7 +65,7 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
     )
     
-configure_package_config_file(adcConfig.cmake.in
+configure_package_config_file(${TARGET_ADC}Config.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ADC}/${TARGET_ADC}Config.cmake
     INSTALL_DESTINATION 
         ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_ADC}/
@@ -100,9 +100,11 @@ install(DIRECTORY
         Devel
 )
 
-add_executable(${PROJECT_NAME}  src/adcr/main.cpp)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_link_libraries(${PROJECT_NAME} 
+set(TARGET_ADC_READER adc-reader)
+add_executable(${TARGET_ADC_READER}  src/adcr/main.cpp)
+target_compile_features(${TARGET_ADC_READER} PRIVATE cxx_std_17)
+set_target_properties(${TARGET_ADC_READER} PROPERTIES OUTPUT_NAME adcr)
+target_link_libraries(${TARGET_ADC_READER} 
     PRIVATE 
         ${TARGET_ADC} 
         date::date 
@@ -112,12 +114,12 @@ target_link_libraries(${PROJECT_NAME}
         concurrentqueue::concurrentqueue
         rt crypt m
 )
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${TARGET_ADC_READER} 
     PRIVATE 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${TARGET_ADC_READER} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(ENABLE_API_DOCUMENTATION)
     find_package(Doxygen
