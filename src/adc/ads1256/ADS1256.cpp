@@ -31,6 +31,8 @@
 
 #include "adc/device_config.h"
 
+#include <spdlog/spdlog.h>
+
 using namespace adc::ads1256;
 
 /******************************************************************************
@@ -109,7 +111,7 @@ void ADS1256::WaitDRDY()
             break;
     }
     if (i >= 4000000) {
-        printf("Time Out ...\r\n");
+        spdlog::info("Time Out ...\r\n");
     }
 }
 
@@ -213,10 +215,10 @@ uint8_t ADS1256::init()
 
     for (int i = 0; i < 3; ++i) {
         if (ReadChipID() == 3) {
-            printf("ID Read success \r\n");
+            spdlog::info("ID Read success");
             break;
         } else {
-            printf("ID Read failed \r\n");
+            spdlog::info("ID Read failed \r\n");
             if (i == 2)
                 return 1;
         }
@@ -246,7 +248,7 @@ uint32_t ADS1256::Read_ADC_Data()
     read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
     read |= ((uint32_t)buf[1] << 8); /* Pay attention to It is wrong   read |= (buf[1] << 8) */
     read |= buf[2];
-    //printf("%d  %d  %d \r\n",buf[0],buf[1],buf[2]);
+    //spdlog::trace("%d  %d  %d \r\n",buf[0],buf[1],buf[2]);
     if (read & 0x800000)
         read |= 0xFF000000;
     return read;
@@ -266,7 +268,7 @@ uint32_t ADS1256::Read_ADC_Data_Lite()
     read = ((uint32_t)buf[0] << 16) & 0x00FF0000;
     read |= ((uint32_t)buf[1] << 8); /* Pay attention to It is wrong   read |= (buf[1] << 8) */
     read |= buf[2];
-    //printf("%d  %d  %d \r\n",buf[0],buf[1],buf[2]);
+    //spdlog::trace("%d  %d  %d \r\n",buf[0],buf[1],buf[2]);
     if (read & 0x800000)
         read |= 0xFF000000;
     return read;

@@ -44,7 +44,7 @@
 
 #define SYSFS_GPIO_DEBUG 0
 #if SYSFS_GPIO_DEBUG 
-	#define SYSFS_GPIO_Debug(__info,...) printf("Debug: " __info,##__VA_ARGS__)
+	#define SYSFS_GPIO_Debug(__info,...) spdlog::trace("Debug: " __info,##__VA_ARGS__)
 #else
 	#define SYSFS_GPIO_Debug(__info,...)  
 #endif 
