@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+find_package(bcm2835 CONFIG REQUIRED)
+
+include(${CMAKE_CURRENT_LIST_DIR}/@TARGET_ADC@Targets.cmake)
