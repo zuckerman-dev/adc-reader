@@ -5,7 +5,7 @@ class AdcReaderConan(ConanFile):
    version = "0.0.1"
    settings = "os", "compiler", "build_type", "arch"
    requires = "date/3.0.0",  \
-            "spdlog/[>=1.4.1]",  \
+            "spdlog/1.8.5",  \
             "concurrentqueue/1.0.2",  \
             "CLI11/1.9.1@cliutils/stable",  \
             "WiringPi/2.60.0@zdev/testing",  \

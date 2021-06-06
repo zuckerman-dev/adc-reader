@@ -92,9 +92,10 @@ install(
         Devel
 )
 
-install(FILES ${ADC_PUBLIC_HEADERS} 
+install(DIRECTORY 
+        ${CMAKE_SOURCE_DIR}/include/
     DESTINATION 
-        ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/adc/
+        ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
     COMPONENT 
         Devel
 )
