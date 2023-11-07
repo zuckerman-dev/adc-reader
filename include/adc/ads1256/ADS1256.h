@@ -30,6 +30,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 
 namespace adc::ads1256 {
 
